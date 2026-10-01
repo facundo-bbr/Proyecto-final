@@ -27,8 +27,13 @@ public class GestorVida {
             activarInvulnerabilidad(0.5f);
         }
 		
-		
 	}
+	 public void curar (int curacion)
+		 {
+		 salud += curacion;
+	     if (salud > saludMax) {
+	         salud = saludMax;
+		 }}
 	public void aumentarVidaMaxima(int cantidadAumento) {
         saludMax += cantidadAumento;
         salud += cantidadAumento; 

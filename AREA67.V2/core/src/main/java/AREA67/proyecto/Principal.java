@@ -1,6 +1,7 @@
 package AREA67.proyecto;
 
 import com.badlogic.gdx.ApplicationAdapter;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
@@ -24,6 +25,8 @@ public class Principal extends ApplicationAdapter {
     private OrthographicCamera camera;
     private float pjX;
     private float pjY;
+    private float tiempoJuego;
+    private BitmapFont fuenteSurvival;
 
     // VARIABLES JUGADOR
     private Texture sheetSoldado; 
@@ -31,7 +34,8 @@ public class Principal extends ApplicationAdapter {
     private TextureRegion frameEstatico;
     private float stateTime; 
     private GestorVida vidaJugador;
-    private boolean mirandoDerecha; 
+    private boolean mirandoDerecha;
+
 
     // VARIABLES ENEMIGOS 
     private Array<enemigos> listaEnemigos;
@@ -46,6 +50,9 @@ public class Principal extends ApplicationAdapter {
         image = new Texture("mapa.jpg");
         manager = new AssetManager();
         camera = new OrthographicCamera();
+        tiempoJuego = 0f;
+        fuenteSurvival = new BitmapFont();
+        fuenteSurvival.getData().setScale(1.5f);
         camera.setToOrtho(false, 800, 600);
         pjX = 400;
         pjY = 300;
@@ -54,7 +61,7 @@ public class Principal extends ApplicationAdapter {
         vidaJugador = new GestorVida(100);
 
         // 1. Carga segura del Soldado
-        sheetSoldado = new Texture(Gdx.files.internal("soldado.png"));
+        sheetSoldado = new Texture(Gdx.files.internal("donpollo_derecha.png"));
         int anchoSoldado = sheetSoldado.getWidth() / 3;
         TextureRegion[][] matrizCortes = TextureRegion.split(sheetSoldado, anchoSoldado, sheetSoldado.getHeight());
 
@@ -86,10 +93,10 @@ public class Principal extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        float speed = 180f * deltaTime;
+        float speed = 160f * deltaTime;
         
         vidaJugador.actualizar(deltaTime);
-
+        tiempoJuego += deltaTime;	
         // LÓGICA DE MOVIMIENTO JUGADOR
         boolean seEstaMoviendo = false;
 
@@ -171,6 +178,27 @@ public class Principal extends ApplicationAdapter {
         for (enemigos enemigo : listaEnemigos) {
             enemigo.dibujar(batch);
         }
+     // Convertimos el tiempo total en formato de minutos y segundos
+        int minutos = (int) (tiempoJuego / 60);
+        int segundos = (int) (tiempoJuego % 60);
+        String textoTiempo = String.format("TIEMPO: %02d:%02d", minutos, segundos);
+
+        // Posición fija en la esquina superior izquierda respecto a la cámara
+        float textoX = camera.position.x - 380f; 
+        float textoY = camera.position.y + 270f; 
+
+        // BORDE NEGRO GRUESO (Simulado duplicando el texto en cruz y diagonales)
+        fuenteSurvival.setColor(Color.BLACK);
+        fuenteSurvival.draw(batch, textoTiempo, textoX - 2, textoY);
+        fuenteSurvival.draw(batch, textoTiempo, textoX + 2, textoY);
+        fuenteSurvival.draw(batch, textoTiempo, textoX, textoY - 2);
+        fuenteSurvival.draw(batch, textoTiempo, textoX, textoY + 2);
+        fuenteSurvival.draw(batch, textoTiempo, textoX - 2, textoY - 2);
+        fuenteSurvival.draw(batch, textoTiempo, textoX + 2, textoY + 2);
+
+        // TEXTO PRINCIPAL EN COLOR AMARILLO/BLANCO ARCADE (Ideal para estilo retro/survival)
+        fuenteSurvival.setColor(Color.YELLOW); // O puedes usar Color.WHITE según prefieras
+        fuenteSurvival.draw(batch, textoTiempo, textoX, textoY);
 
         batch.draw(frameActual, pjX, pjY); 
         
@@ -208,5 +236,6 @@ public class Principal extends ApplicationAdapter {
         image.dispose();
         sheetSoldado.dispose();
         sheetEnemigo.dispose();
+        fuenteSurvival.dispose(); // NUEVO: Limpia la fuente de la memoria
     }
 }
