@@ -1,7 +1,7 @@
 ## [1-10-2026]
 -Cambios 
 
--Se Agregaron 1 nueva clase, fusil(para la arma default).
+-Se agreggo 1 nueva clase, fusil(para la arma default).
 
 -Se agrego un contador de tiempo jugado.
 
