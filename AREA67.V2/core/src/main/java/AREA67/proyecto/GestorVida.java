@@ -15,19 +15,15 @@ public class GestorVida {
 	}
 	
 	public void aplicardano(int danoinflijido) {
-		if(esInvulnerable==true || danoinflijido < 0)
-		{
-			return ;
-		}
-		salud -=danoinflijido;
-		
-		if (salud <= 0) {
-            salud = 0;
-        } else {
-            activarInvulnerabilidad(0.5f);
+		if (!esInvulnerable) {
+            salud -= danoinflijido;
+            esInvulnerable = true;              // Activamos la inmunidad
+            tiempoInvulnerable = 1.0f; // Reiniciamos el temporizador
+            
+            if (salud < 0) salud = 0;
         }
+    }
 		
-	}
 	 public void curar (int curacion)
 		 {
 		 salud += curacion;
@@ -41,9 +37,10 @@ public class GestorVida {
 	
 	public void actualizar(float deltaTime) {
         if (esInvulnerable) {
-            tiempoInvulnerable -= deltaTime;
+            tiempoInvulnerable -= deltaTime; // ¡Esto es lo que hace que el tiempo corra!
+            
             if (tiempoInvulnerable <= 0) {
-                esInvulnerable = false;
+                esInvulnerable = false; // Se acaba la inmunidad, vuelve a poder recibir daño
             }
         }
     }
@@ -59,4 +56,5 @@ public class GestorVida {
     public int getVidaMaxima() {
         return saludMax;
     }
+    
 }

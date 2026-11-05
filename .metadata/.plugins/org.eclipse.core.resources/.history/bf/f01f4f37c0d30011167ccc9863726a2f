@@ -1,0 +1,60 @@
+package AREA67.proyecto;
+
+import com.badlogic.gdx.utils.Array;
+
+public class Personaje {
+	static float velocidadMovimiento = 200f;
+
+	GestorVida salud = new GestorVida(100);
+    GestorExperiencia exp = new GestorExperiencia();
+    Recolector recolector = new Recolector(70f);
+    Arma[] arsenal = new Arma[6];
+
+    public Personaje() {
+        // No pongas 'new Fusil()' aquí si no tienes la textura todavía.
+        // Deja el arsenal listo para llenarlo desde Principal:
+        this.arsenal = new Arma[6];
+    }
+    		
+	public void recibirDano(int cantidad) {
+        salud.aplicardano(cantidad);
+
+
+    }
+	public float getVelocidadMovimiento() {
+        return velocidadMovimiento;
+    }
+	public GestorVida getSalud() {
+        return salud;
+    }
+	public GestorVida getGestorVida() {
+		return salud;
+	}
+	public void actualizar(float deltaTime, float x, float y, Array<enemigos> listaEnemigos, Array<bala> listaBalas) {
+	    // 1. Actualiza el temporizador de invulnerabilidad de la salud
+	    salud.actualizar(deltaTime);
+
+	    // 2. Actualiza el imán del recolector
+	    recolector.actualizar(deltaTime);
+
+	    // 3. Actualiza el disparo automático de las armas del arsenal
+	    for (Arma arma : arsenal) {
+	        if (arma != null) {
+	            // ¡Aquí le pasamos la listaBalas real en lugar de null!
+	            arma.actualizar(deltaTime, x, y, listaEnemigos, listaBalas);
+	        }
+	    }
+	}
+
+	public GestorExperiencia getGestorExperiencia() {
+        return exp;
+    }
+
+    public Recolector getRecolector() {
+        return recolector;
+    }
+
+	public boolean estaMuerto() {
+	    return salud.getVidaActual() <= 0;
+	}
+}

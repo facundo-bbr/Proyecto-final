@@ -39,4 +39,10 @@ public class ObjetoSuelo {
     public float getY() {
         return posicion.y;
     }
+
+    public void setPosicion(float x, float y) {
+        this.posicion.set(x, y);
+    }
+
+
 }

@@ -16,21 +16,17 @@ public abstract class Arma {
     }
 
     // El bucle principal actualiza el reloj de todas las armas constantemente
-    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos) {
+    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<bala> listaBalas) {
         tiempoRestante -= deltaTime;
 
-        // El ataque se ejecuta de forma automática al agotarse el tiempo, 
-        // sin importar si hay o no enemigos en el rango.
         if (tiempoRestante <= 0) {
-            disparar(jugadorX, jugadorY, listaEnemigos);
-            tiempoRestante = cadenciaAtaque; // Reinicia el ciclo automático
+            disparar(jugadorX, jugadorY, listaEnemigos, listaBalas); // Le pasamos la lista de balas aquí también
+            tiempoRestante = cadenciaAtaque; 
         }
     }
 
-    // Método abstracto: Cada variedad de arma definirá su propia lógica de ataque aquí
-    public abstract void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos);
-
-    // --- GETTERS Y MEJORAS ---
+ // En Arma.java (debe verse exactamente así, sin llaves):
+    public abstract void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<bala> listaBalas); // --- GETTERS Y MEJORAS ---
     public String getNombre() {
         return nombre;
     }
@@ -41,5 +37,16 @@ public abstract class Arma {
 
     public void mejorarDano(int incremento) {
         this.dano += incremento;
+    }
+    public float getCadenciaAtaque() {
+        return cadenciaAtaque;
+    }
+
+    public float getTiempoRestante() {
+        return tiempoRestante;
+    }
+
+    public void setCadenciaAtaque(float cadenciaAtaque) {
+        this.cadenciaAtaque = cadenciaAtaque;
     }
 }

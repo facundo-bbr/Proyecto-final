@@ -4,11 +4,13 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 public class enemigos {
     private Vector2 posicion;
     private float velocidad = 120f;
+    private int vida = 100;
 
     private Animation<TextureRegion> animacion;
     private float stateTime;
@@ -69,5 +71,26 @@ public class enemigos {
     
     public float getY() { 
         return posicion.y; 
+    }
+    public boolean estaMuerto() {
+        return vida <= 0;
+    }
+
+    // Método para restarle vida cuando le pega un arma
+    public void recibirDano(int cantidad) {
+        if (cantidad > 0 && vida > 0) {
+            vida = Math.max(0, vida - cantidad);
+        }
+    }
+    
+    public Rectangle getBounds() {
+        // Obtenemos el frame actual de la animación para saber su ancho y alto reales
+        TextureRegion frameActual = animacion.getKeyFrame(stateTime, true);
+        
+        float ancho = frameActual.getRegionWidth();
+        float alto = frameActual.getRegionHeight();
+        
+        // Si quieres centrar un poco la caja de colisión (opcional), puedes ajustar los valores:
+        return new Rectangle(posicion.x, posicion.y, ancho, alto);
     }
 }
