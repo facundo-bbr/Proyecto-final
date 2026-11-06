@@ -4,21 +4,26 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.Array;
 
 public class MenuMejora {
     
     private boolean activo = false;
     private String[] opciones = new String[3];
-    private int[] tipoMejora = new int[3]; // Código para saber qué hace cada opción
-    
+    private int[] tipoMejora = new int[3]; 
     private GlyphLayout layout = new GlyphLayout();
+    
+    private Texture texturaCuchillo;
+    private Texture texturaPincho;
 
-    // Activa el menú y genera 3 opciones aleatorias
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho) {
+        this.texturaCuchillo = texturaCuchillo;
+        this.texturaPincho = texturaPincho;
+    }
+
     public void abrir() {
         this.activo = true;
         generarOpcionesAleatorias();
@@ -33,12 +38,13 @@ public class MenuMejora {
     }
 
     private void generarOpcionesAleatorias() {
-        // Pool exclusivo de mejoras pasivas (sin lanzallamas por ahora)
         String[] poolDescripciones = {
-            "Aumentar +20% Daño de Armas",
-            "Curar Vida Completa",
-            "Aumentar +15% Velocidad de Movimiento",
-            "Aumentar Rango de Recoleccion de Gemas"
+            "Aumentar +20% Daño de Armas",          // Tipo 0
+            "Curar Vida Completa",                  // Tipo 1
+            "Aumentar +15% Velocidad de Movimiento", // Tipo 2
+            "Aumentar Rango de Recoleccion de Gemas", // Tipo 3
+            "Equipar Cuchillo Teledirigido",         // Tipo 4
+            "Equipar Bola de Pinchos"                // Tipo 5
         };
 
         for (int i = 0; i < 3; i++) {
@@ -48,7 +54,6 @@ public class MenuMejora {
         }
     }
 
-    // Gestionar la entrada del jugador (Teclado 1, 2, 3 o Clic)
     public void manejarEntrada(Personaje jugador) {
         if (!activo) return;
 
@@ -64,7 +69,7 @@ public class MenuMejora {
 
         if (seleccion != -1) {
             aplicarMejora(seleccion, jugador);
-            cerrar(); // Cerramos el menú y reanudamos el juego
+            cerrar(); 
         }
     }
 
@@ -74,49 +79,75 @@ public class MenuMejora {
         
         switch (tipo) {
             case 0:
-                // Aumentar daño (puedes implementarlo iterando las armas de tu arsenal si lo deseas)
-                for (Arma arma : jugador.arsenal) {
+                for (Arma arma : jugador.getArsenal()) {
                     if (arma != null) {
-                        // Si tus armas tienen un modificador de daño, puedes subirlo aquí
+                        arma.mejorarDano(10);
                     }
                 }
                 break;
                 
             case 1:
-                // --- CURACIÓN COMPLETA ---
                 jugador.curarAlMaximo();
                 System.out.println("¡Vida restaurada al máximo!");
                 break;
                 
             case 2:
-                // Aumentar velocidad de movimiento pasiva
                 Personaje.velocidadMovimiento += 25f;
                 break;
                 
             case 3:
-                // Aumentamos el radio del recolector pasivamente
                 if (jugador.getRecolector() != null) {
-                    jugador.getRecolector().mejorarRango(25f); // Sube 25 píxeles el radio de recolección
+                    jugador.getRecolector().mejorarRango(25f);
+                }
+                break;
+
+            case 4:
+                boolean equipado = false;
+                for (int i = 0; i < jugador.getArsenal().length; i++) {
+                    if (jugador.getArsenal()[i] == null) {
+                        jugador.getArsenal()[i] = new ArmaCuchillo(texturaCuchillo);
+                        equipado = true;
+                        System.out.println("¡Cuchillo equipado en el espacio " + i + "!");
+                        break;
+                    }
+                }
+                if (!equipado) {
+                    System.out.println("¡Arsenal lleno! No se pudo equipar el cuchillo.");
+                }
+                break;
+                
+            case 5:
+                boolean equipadoBola = false;
+                for (int i = 0; i < jugador.getArsenal().length; i++) {
+                    if (jugador.getArsenal()[i] == null) {
+                        jugador.getArsenal()[i] = new BolaPinchos(texturaPincho);
+                        equipadoBola = true;
+                        System.out.println("¡Bola de Pinchos equipada en el espacio " + i + "!");
+                        break;
+                    }
+                }
+                if (!equipadoBola) {
+                    System.out.println("¡Arsenal lleno! No se pudo equipar la Bola de Pinchos.");
                 }
                 break;
         }
+
+        // Consumimos el nivel pendiente para que el juego continúe con normalidad
+        jugador.getGestorExperiencia().consumirNivelPendiente();
     }
 
-    // Dibujar la interfaz del menú en pantalla centrada en la cámara
     public void dibujar(SpriteBatch batch, BitmapFont fuente, OrthographicCamera camera) {
         if (!activo) return;
 
         float camX = camera.position.x;
         float camY = camera.position.y;
 
-        // Título del Menú
         fuente.setColor(Color.CYAN);
         fuente.getData().setScale(2.0f);
         String titulo = "¡SUBISTE DE NIVEL! ELIGE UNA MEJORA";
         layout.setText(fuente, titulo);
         fuente.draw(batch, titulo, camX - (layout.width / 2f), camY + 120);
 
-        // Opciones
         fuente.getData().setScale(1.4f);
         for (int i = 0; i < 3; i++) {
             fuente.setColor(i == 0 ? Color.YELLOW : (i == 1 ? Color.GREEN : Color.ORANGE));

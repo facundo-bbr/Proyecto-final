@@ -5,8 +5,8 @@ import com.badlogic.gdx.utils.Array;
 public abstract class Arma {
     protected String nombre;
     protected int dano;
-    protected float cadenciaAtaque; // Tiempo en segundos entre cada disparo automático
-    protected float tiempoRestante;  // Temporizador interno
+    protected float cadenciaAtaque;
+    protected float tiempoRestante;
 
     public Arma(String nombre, int dano, float cadenciaAtaque) {
         this.nombre = nombre;
@@ -15,38 +15,23 @@ public abstract class Arma {
         this.tiempoRestante = cadenciaAtaque;
     }
 
-    // El bucle principal actualiza el reloj de todas las armas constantemente
-    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<bala> listaBalas) {
+    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         tiempoRestante -= deltaTime;
 
         if (tiempoRestante <= 0) {
-            disparar(jugadorX, jugadorY, listaEnemigos, listaBalas); // Le pasamos la lista de balas aquí también
+            disparar(jugadorX, jugadorY, listaEnemigos, listaProyectiles);
             tiempoRestante = cadenciaAtaque; 
         }
     }
 
- // En Arma.java (debe verse exactamente así, sin llaves):
-    public abstract void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<bala> listaBalas); // --- GETTERS Y MEJORAS ---
-    public String getNombre() {
-        return nombre;
-    }
+    // Ahora acepta cualquier proyectil que herede de Proyectil
+    public abstract void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles);
 
-    public int getDano() {
-        return dano;
-    }
-
-    public void mejorarDano(int incremento) {
-        this.dano += incremento;
-    }
-    public float getCadenciaAtaque() {
-        return cadenciaAtaque;
-    }
-
-    public float getTiempoRestante() {
-        return tiempoRestante;
-    }
-
-    public void setCadenciaAtaque(float cadenciaAtaque) {
-        this.cadenciaAtaque = cadenciaAtaque;
-    }
+    // Getters y setters...
+    public String getNombre() { return nombre; }
+    public int getDano() { return dano; }
+    public void mejorarDano(int incremento) { this.dano += incremento; }
+    public float getCadenciaAtaque() { return cadenciaAtaque; }
+    public float getTiempoRestante() { return tiempoRestante; }
+    public void setCadenciaAtaque(float cadenciaAtaque) { this.cadenciaAtaque = cadenciaAtaque; }
 }

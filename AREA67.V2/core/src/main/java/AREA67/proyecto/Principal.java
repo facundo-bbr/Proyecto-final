@@ -33,15 +33,17 @@ public class Principal extends ApplicationAdapter {
 
     private Texture texturaGema;
     private Texture texturaBala;
+    private Texture texturaCuchillo;
+    private Texture texturaPincho;
 
     // Entidad Jugador
     private Personaje jugador;
     
     //Menu de subir de nivel
-    private MenuMejora menuMejora = new MenuMejora();
+    private MenuMejora menuMejora;
     
     // Listas del juego
-    private Array<bala> listaBalas = new Array<>();
+    private Array<Proyectil> listaProyectiles = new Array<>();
     private Array<enemigos> listaEnemigos = new Array<>();
     private Array<ObjetoSuelo> listaObjetosSuelo = new Array<>();
 
@@ -70,6 +72,8 @@ public class Principal extends ApplicationAdapter {
 
         texturaGema = new Texture("xpverde.png");
         texturaBala = new Texture("bala.png");
+        texturaCuchillo=new Texture ("xprojo.png");
+        texturaPincho=new Texture ("Pincho.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -88,7 +92,7 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        
+        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho);
     }
 
     @Override
@@ -183,12 +187,7 @@ public class Principal extends ApplicationAdapter {
             return; 
         }
         
-        tiempoJuego += deltaTime;
 
-        // 1. ACTUALIZAR JUGADOR Y ARSENAL
-        if (jugador != null) {
-            jugador.actualizar(deltaTime, listaEnemigos, listaBalas);
-        }
 
         if (jugador.estaMuerto()) {
             if (!yaMurio) {
@@ -205,82 +204,87 @@ public class Principal extends ApplicationAdapter {
             menuMejora.abrir();
         }
 
-        // 2. SI EL MENÚ DE MEJORA ESTÁ ABIERTO, CONGELAMOS EL JUEGO Y GESTIONAMOS TECLAS
+         centroPjX = jugador.getCentroX();
+         centroPjY = jugador.getCentroY();
+
+        // 2. CONTROLAR EL FLUJO: Menú Activo vs Lógica del Juego
         if (menuMejora.isActivo()) {
+            // El menú está abierto: congelamos TODO el juego y solo manejamos el menú
             menuMejora.manejarEntrada(jugador);
-            
-            // Si el jugador ya seleccionó una mejora, consumimos el nivel pendiente
-            if (!menuMejora.isActivo()) {
-                jugador.getGestorExperiencia().consumirNivelPendiente();
-            }
+        } else {
+            // --- TODO ESTE BLOQUE SE CONGELA CUANDO EL MENÚ ESTÁ ABIERTO ---
+            tiempoJuego += deltaTime; 
 
-            // Renderizado en pausa (muestra el mapa y entidades estáticas de fondo)
-            ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
-            batch.setProjectionMatrix(camera.combined);
-            batch.begin();
-            batch.draw(image, 0, 0);
-            
-            jugador.dibujar(batch);
-            for (enemigos enemigo : listaEnemigos) {
-                enemigo.dibujar(batch);
+            // Actualizar movimiento, armas y cooldowns del jugador
+            jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles);
+
+            // Actualizar proyectiles generales
+            for (int i = listaProyectiles.size - 1; i >= 0; i--) {
+                Proyectil p = listaProyectiles.get(i);
+                p.actualizar(deltaTime, listaEnemigos);
             }
             
-            menuMejora.dibujar(batch, fuenteMenu, camera);
-            batch.end();
-            return; // Frena el bucle del juego para que los zombis no te ataquen mientras eliges
-        }
-        // 2. SPAWNEO Y LÓGICA DE ENEMIGOS	
-        temporizadorSpawneo += deltaTime;
-        if (temporizadorSpawneo > 1.5f) {
-            listaEnemigos.add(new enemigos(framesEnemigo, centroPjX, centroPjY));
-            temporizadorSpawneo = 0f;
-        }
+            // Spawneo de enemigos
+            temporizadorSpawneo += deltaTime;
+            if (temporizadorSpawneo > 1.5f) {
+                listaEnemigos.add(new enemigos(framesEnemigo, centroPjX, centroPjY));
+                temporizadorSpawneo = 0f;
+            }
 
-        // Colisiones: Balas vs Enemigos
-        for (int i = listaBalas.size - 1; i >= 0; i--) {
-            bala b = listaBalas.get(i);
-            b.actualizar(deltaTime);
-            if (!b.estaActiva()) continue;
+            // Colisiones: Proyectiles vs Enemigos
+            for (int i = listaProyectiles.size - 1; i >= 0; i--) {
+                Proyectil p = listaProyectiles.get(i);
+                p.actualizar(deltaTime, listaEnemigos);
 
-            boolean balaImpactada = false;
-            for (int j = listaEnemigos.size - 1; j >= 0; j--) {
-                enemigos enemigo = listaEnemigos.get(j);
-                if (b.getBounds().overlaps(enemigo.getBounds())) {
-                    enemigo.recibirDano(b.getDano());
-                    balaImpactada = true;
-                    break;
+                if (!p.isActivo()) {
+                    listaProyectiles.removeIndex(i);
+                    continue;
+                }
+
+                boolean impacto = false;
+                for (int j = listaEnemigos.size - 1; j >= 0; j--) {
+                    enemigos enemigo = listaEnemigos.get(j);
+                    if (p.getBounds().overlaps(enemigo.getBounds())) {
+                        enemigo.recibirDano(p.getDano());
+                        impacto = true;
+                        p.destruir();
+                        break;
+                    }
+                }
+
+                if (impacto || !p.isActivo()) {
+                    listaProyectiles.removeIndex(i);
                 }
             }
-            if (balaImpactada) {
-                listaBalas.removeIndex(i);
-            }
-        }
 
-        // Colisiones: Persecución y Ataque del Enemigo al Jugador
-        float objetivoX = centroPjX - (framesEnemigo[0].getRegionWidth() / 2f);
-        float objetivoY = centroPjY - (framesEnemigo[0].getRegionHeight() / 2f);
+            // Colisiones: Persecución y Ataque del Enemigo al Jugador
+            float objetivoX = centroPjX - (framesEnemigo[0].getRegionWidth() / 2f);
+            float objetivoY = centroPjY - (framesEnemigo[0].getRegionHeight() / 2f);
 
-        for (int i = listaEnemigos.size - 1; i >= 0; i--) {
-            enemigos enemigo = listaEnemigos.get(i);
-            enemigo.perseguir(objetivoX, objetivoY, deltaTime);
+            for (int i = listaEnemigos.size - 1; i >= 0; i--) {
+                enemigos enemigo = listaEnemigos.get(i);
+                enemigo.perseguir(objetivoX, objetivoY, deltaTime); // Se mueven solo aquí
 
-            if (enemigo.estaMuerto()) {
+                if (enemigo.estaMuerto()) {
+                    float centroZombiX = enemigo.getX() + (framesEnemigo[0].getRegionWidth() / 2f);
+                    float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
+                    float gemaX = centroZombiX - (texturaGema.getWidth() / 2f);
+                    float gemaY = centroZombiY - (texturaGema.getHeight() / 2f);
+
+                    listaObjetosSuelo.add(new ObjetoSuelo(gemaX, gemaY, "GEMA_EXPERIENCIA", 15));
+                    listaEnemigos.removeIndex(i);
+                    continue;
+                }
+
                 float centroZombiX = enemigo.getX() + (framesEnemigo[0].getRegionWidth() / 2f);
                 float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
-                float gemaX = centroZombiX - (texturaGema.getWidth() / 2f);
-                float gemaY = centroZombiY - (texturaGema.getHeight() / 2f);
-
-                listaObjetosSuelo.add(new ObjetoSuelo(gemaX, gemaY, "GEMA_EXPERIENCIA", 15));
-                listaEnemigos.removeIndex(i);
-                continue;
+                if (Vector2.dst(centroPjX, centroPjY, centroZombiX, centroZombiY) < 45f) {
+                    jugador.recibirDano(10);
+                }
             }
-
-            float centroZombiX = enemigo.getX() + (framesEnemigo[0].getRegionWidth() / 2f);
-            float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
-            if (Vector2.dst(centroPjX, centroPjY, centroZombiX, centroZombiY) < 45f) {
-                jugador.recibirDano(10);
-            }
-        }
+        } // <--- FIN DEL BLOQUE ELSE (Aquí termina la congelación)
+        
+       
 
         // 3. CÁMARA Y LÍMITES DEL MAPA
         float pjXClamped = MathUtils.clamp(jugador.getX(), 0, image.getWidth() - jugador.getAncho());
@@ -321,7 +325,7 @@ public class Principal extends ApplicationAdapter {
         for (enemigos enemigo : listaEnemigos) {
             enemigo.dibujar(batch);
         }
-        for (bala b : listaBalas) {
+        for (Proyectil b : listaProyectiles) {
             b.dibujar(batch);
         }
 
@@ -329,7 +333,15 @@ public class Principal extends ApplicationAdapter {
 
         // HUD Texto
         dibujarUIHUD();
-
+        
+        for (Arma arma : jugador.arsenal) {
+            if (arma instanceof BolaPinchos) {
+                ((BolaPinchos) arma).dibujar(batch);
+            }
+        }
+        
+        menuMejora.dibujar(batch, fuenteMenu, camera);
+        
         batch.end();
 
         // 5. RENDERIZADO (SHAPE RENDERER - BARRAS SOBRE EL JUGADOR)
