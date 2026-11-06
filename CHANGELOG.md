@@ -1,3 +1,16 @@
+## [6-11-2026]
+-cambio
+
+-se agrego 4 clases nuevas: Proyectil,Cuchillo,ArmaCuchillo y BolaPinchos
+
+-se agregaron 2 armas nuevas con sus sprites y proyectiles
+
+-se cambiaron la forma en la que dibujábamos los proyectiles
+
+-arreglos
+
+-Se arreglo el error que permitía al jugador moverse mientras estaba abierto el menuMejora
+
 ## [5-11-2026]
 -Cambios
 
