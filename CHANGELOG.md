@@ -1,3 +1,15 @@
+## [5-11-2026]
+-Cambios
+
+-Se agrego 2 clases nuevas,bala,MenuMejora
+
+-Se le agregaron los sprites de la bala
+
+-El menuMejora sube las estadisticas de las armas ,velocidad y rango de recoleccion del personaje
+
+-Se le agrego un Menu al iniciar al juego
+
+
 ## [1-10-2026]
 -Cambios 
 
