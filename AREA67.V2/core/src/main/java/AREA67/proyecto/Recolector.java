@@ -1,35 +1,34 @@
 package AREA67.proyecto;
 
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+
 
 public class Recolector {
-	private float radio;
-	private float multiplicador;
-	private float velocidadAtraccion = 400f;
-	private boolean imanActivo;
-	private float tiempoIman;
-	private float iman = radio*4;
-
+    private float radio;
+    private float multiplicador;
+    private float velocidadAtraccion = 400f;
+    private boolean imanActivo;
+    private float tiempoIman;
 
     public Recolector(float imanNormal) {
         this.radio = imanNormal;
         this.multiplicador = 1.0f;
-        this.imanActivo=false;
-        this.tiempoIman=0f;
+        this.imanActivo = false;
+        this.tiempoIman = 0f;
     }
 
-
-
-
-
-	public float getRadioTotal() {
-		if (imanActivo) {
-            return iman;
+    public float getRadioTotal() {
+        if (imanActivo) {
+            return radio * 4f; // Calculado dinámicamente según el radio actual
         }
         return radio * multiplicador;
     }
 
-	public void actualizar(float deltaTime) {
+    public void actualizar(float deltaTime) {
         if (imanActivo) {
             tiempoIman -= deltaTime;
 
@@ -45,24 +44,25 @@ public class Recolector {
 
         // Distancia entre el objeto y el jugador
         float distancia = Vector2.dst(objeto.getX(), objeto.getY(), jugadorX, jugadorY);
-        // Si el objeto entra en el radio del imán, se desplaza hacia el jugador
-        if (distancia <= radio) {
-            // Calculamos la dirección hacia el jugador
+        
+        // CORREGIDO: Usar getRadioTotal() para que tome en cuenta el imán o las mejoras
+        if (distancia <= getRadioTotal()) {
             float dirX = jugadorX - objeto.getX();
             float dirY = jugadorY - objeto.getY();
 
-            // Normalizamos el vector y movemos el objeto paso a paso con la velocidad
             Vector2 direccion = new Vector2(dirX, dirY).nor();
 
             float nuevaX = objeto.getX() + (direccion.x * velocidadAtraccion * deltaTime);
             float nuevaY = objeto.getY() + (direccion.y * velocidadAtraccion * deltaTime);
 
-            // Actualizamos la posición del objeto en el suelo
             objeto.setPosicion(nuevaX, nuevaY);
         }
     }
 
-	private void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud) {
+    // CAMBIADO A PUBLIC para poder llamarlo desde tu bucle principal al chocar con objetos
+    public void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud, Texture texturaCuchillo,Texture texturaPincho,Personaje jugador) {
+        if (objeto.estaRecogido()) return;
+        
         objeto.marcarComoRecogido();
 
         switch (objeto.getTipo()) {
@@ -73,29 +73,44 @@ public class Recolector {
                 salud.curar(objeto.getValor());
                 break;
             case "COFRE_TESORO":
-                System.out.println("Abriendo interfaz de cofre...");
+            	Arma[] arsenal = jugador.getArsenal();
+                boolean equipado = false;
+                int tipoArmaRandom = (int) (Math.random() * 2); 
+
+                for (int i = 0; i < arsenal.length; i++) {
+                    if (arsenal[i] == null) {
+                        if (tipoArmaRandom == 0) {
+                            arsenal[i] = new ArmaCuchillo(texturaCuchillo);
+                            System.out.println("¡Cuchillo obtenido del cofre!");
+                        } else {
+                            arsenal[i] = new BolaPinchos(texturaPincho);
+                            System.out.println("¡Bola de pinchos obtenida del cofre!");
+                        }
+                        equipado = true;
+                        break;
+                    }
+                }
+                if (!equipado) System.out.println("¡Arsenal lleno!");
                 break;
             case "IMAN":
-            	activarIman(objeto.getValor());
-            	break;
+                activarIman(objeto.getValor());
+                break;
             default:
                 System.out.println("Objeto desconocido.");
                 break;
         }
     }
-	
-	private void activarIman(float duracionEnSegundos) {
+    
+    private void activarIman(float duracionEnSegundos) {
         this.imanActivo = true;
-
         this.tiempoIman += duracionEnSegundos;
     }
 
-	public float getRangoIman() {
+    public float getRangoIman() {
         return radio;
     }
 
-	public void mejorarRango(float incremento) {
+    public void mejorarRango(float incremento) {
         this.radio += incremento;
     }
-
 }

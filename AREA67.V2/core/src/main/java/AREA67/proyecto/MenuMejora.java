@@ -97,7 +97,7 @@ public class MenuMejora {
                 
             case 3:
                 if (jugador.getRecolector() != null) {
-                    jugador.getRecolector().mejorarRango(25f);
+                    jugador.getRecolector().mejorarRango(15f);
                 }
                 break;
 

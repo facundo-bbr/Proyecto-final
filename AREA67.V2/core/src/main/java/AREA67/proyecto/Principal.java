@@ -35,6 +35,9 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaBala;
     private Texture texturaCuchillo;
     private Texture texturaPincho;
+    private Texture texturaPollo;
+    private Texture texturaIman;
+    private Texture texturaCofre;
 
     // Entidad Jugador
     private Personaje jugador;
@@ -46,11 +49,14 @@ public class Principal extends ApplicationAdapter {
     private Array<Proyectil> listaProyectiles = new Array<>();
     private Array<enemigos> listaEnemigos = new Array<>();
     private Array<ObjetoSuelo> listaObjetosSuelo = new Array<>();
+    private Array<Obstaculos> listaObstaculos = new Array<>();
 
     // Recursos Enemigo
     private Texture sheetEnemigo;
     private TextureRegion[] framesEnemigo;
     private float temporizadorSpawneo;
+    
+    private Texture texturaObstaculo;
 
     private boolean yaMurio = false;
     
@@ -74,6 +80,10 @@ public class Principal extends ApplicationAdapter {
         texturaBala = new Texture("bala.png");
         texturaCuchillo=new Texture ("xprojo.png");
         texturaPincho=new Texture ("Pincho.png");
+        texturaPollo=new Texture ("tilin.png");
+        texturaObstaculo= new Texture ("Barril.png");
+        texturaIman = new Texture ("Iman.png");
+        texturaCofre= new Texture ("Cofre.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -93,6 +103,19 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu.getData().setScale(2.0f);
         
         menuMejora = new MenuMejora(texturaCuchillo,texturaPincho);
+        
+        float anchoMapa = image.getWidth();
+        float altoMapa = image.getHeight();
+        
+        int cantidadObstaculos=7;
+        
+        for (int i = 0; i < cantidadObstaculos; i++) {
+            float posX = com.badlogic.gdx.math.MathUtils.random(50, anchoMapa - 100);
+            float posY = com.badlogic.gdx.math.MathUtils.random(50, altoMapa - 100);
+            
+            // Crear el obstáculo con vida inicial (ej: 50) y añadirlo a la lista
+            listaObstaculos.add(new Obstaculos(posX, posY, texturaObstaculo, 250));
+        }
     }
 
     @Override
@@ -218,12 +241,7 @@ public class Principal extends ApplicationAdapter {
             // Actualizar movimiento, armas y cooldowns del jugador
             jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles);
 
-            // Actualizar proyectiles generales
-            for (int i = listaProyectiles.size - 1; i >= 0; i--) {
-                Proyectil p = listaProyectiles.get(i);
-                p.actualizar(deltaTime, listaEnemigos);
-            }
-            
+
             // Spawneo de enemigos
             temporizadorSpawneo += deltaTime;
             if (temporizadorSpawneo > 1.5f) {
@@ -231,7 +249,7 @@ public class Principal extends ApplicationAdapter {
                 temporizadorSpawneo = 0f;
             }
 
-            // Colisiones: Proyectiles vs Enemigos
+         // Colisiones: Proyectiles vs Enemigos y Obstáculos
             for (int i = listaProyectiles.size - 1; i >= 0; i--) {
                 Proyectil p = listaProyectiles.get(i);
                 p.actualizar(deltaTime, listaEnemigos);
@@ -242,6 +260,8 @@ public class Principal extends ApplicationAdapter {
                 }
 
                 boolean impacto = false;
+
+                // 1. Colisión contra Enemigos
                 for (int j = listaEnemigos.size - 1; j >= 0; j--) {
                     enemigos enemigo = listaEnemigos.get(j);
                     if (p.getBounds().overlaps(enemigo.getBounds())) {
@@ -252,11 +272,37 @@ public class Principal extends ApplicationAdapter {
                     }
                 }
 
+                // 2. Colisión contra Obstáculos (Solo si el proyectil sigue activo)
+                if (p.isActivo()) {
+                    for (int k = listaObstaculos.size - 1; k >= 0; k--) {
+                        Obstaculos obstaculo = listaObstaculos.get(k);
+                        
+                        if (p.getBounds().overlaps(obstaculo.getBounds())) {
+                            obstaculo.recibirDano(p.getDano());
+                            impacto = true;
+                            p.destruir(); // El proyectil desaparece al impactar
+
+                            if (obstaculo.estaDestruido()) {
+                                // Suelta el objeto al suelo
+                                ObjetoSuelo loot = obstaculo.soltarObjeto(texturaGema,texturaPollo,texturaIman,texturaCofre); // Ajustado a tu método de la clase Obstaculos
+                                if (loot != null) {
+                                    listaObjetosSuelo.add(loot);
+                                }
+                                listaObstaculos.removeIndex(k); // Elimina el obstáculo roto
+                            }
+                            break;
+                        }
+                    }
+                }
+
+                // Si el proyectil impactó contra algo o se desactivó, lo eliminamos de la lista
                 if (impacto || !p.isActivo()) {
                     listaProyectiles.removeIndex(i);
                 }
             }
-
+            
+           
+            
             // Colisiones: Persecución y Ataque del Enemigo al Jugador
             float objetivoX = centroPjX - (framesEnemigo[0].getRegionWidth() / 2f);
             float objetivoY = centroPjY - (framesEnemigo[0].getRegionHeight() / 2f);
@@ -280,6 +326,33 @@ public class Principal extends ApplicationAdapter {
                 float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
                 if (Vector2.dst(centroPjX, centroPjY, centroZombiX, centroZombiY) < 45f) {
                     jugador.recibirDano(10);
+                }
+            }
+            
+            for (int k = listaObstaculos.size - 1; k >= 0; k--) {
+                Obstaculos obstaculo = listaObstaculos.get(k);
+                
+                // 1. Actualizar el temporizador de inmunidad del barril
+                obstaculo.actualizar(deltaTime);
+
+                // 2. Comprobar colisión con la Bola de Pinchos
+                for (Arma arma : jugador.arsenal) {
+                    if (arma != null && arma instanceof BolaPinchos) {
+                        BolaPinchos bola = (BolaPinchos) arma;
+
+                        if (bola.getBounds().overlaps(obstaculo.getBounds())) {
+                            obstaculo.recibirDano(bola.getDano());
+
+                            if (obstaculo.estaDestruido()) {
+                                ObjetoSuelo loot = obstaculo.soltarObjeto(texturaGema,texturaPollo,texturaIman,texturaCofre);
+                                if (loot != null) {
+                                    listaObjetosSuelo.add(loot);
+                                }
+                                listaObstaculos.removeIndex(k);
+                                break; // Salimos del bucle de armas para este obstáculo ya destruido
+                            }
+                        }
+                    }
                 }
             }
         } // <--- FIN DEL BLOQUE ELSE (Aquí termina la congelación)
@@ -308,17 +381,32 @@ public class Principal extends ApplicationAdapter {
 
         batch.draw(image, 0, 0);
 
-        // Gemas y Atracción
+     // Actualizar y dibujar objetos del suelo (Gemas, Pollos, Cofres, Imanes)
         for (int i = listaObjetosSuelo.size - 1; i >= 0; i--) {
             ObjetoSuelo objeto = listaObjetosSuelo.get(i);
+
+            // 1. Mover hacia el jugador si está dentro del rango del imán
             jugador.getRecolector().actualizarObjeto(objeto, deltaTime, centroPjX, centroPjY);
 
-            if (Vector2.dst(centroPjX, centroPjY, objeto.getX(), objeto.getY()) < jugador.getRecolector().getRangoIman()) {
-                jugador.getGestorExperiencia().sumarExperiencia(objeto.getValor());
+            // 2. Comprobar si el jugador lo toca para recogerlo usando el método correcto de tu Recolector
+            float distanciaJugador = Vector2.dst(centroPjX, centroPjY, objeto.getX(), objeto.getY());
+            if (distanciaJugador <= 25f && !objeto.estaRecogido()) {
+                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(),texturaCuchillo,texturaPincho,jugador);
                 listaObjetosSuelo.removeIndex(i);
                 continue;
             }
-            batch.draw(texturaGema, objeto.getX(), objeto.getY());
+
+            // 3. Seleccionar la textura adecuada según el tipo de objeto
+            Texture texturaAElegir = texturaGema;
+            switch (objeto.getTipo()) {
+                case "GEMA_EXPERIENCIA": texturaAElegir = texturaGema; break;
+                case "POLLO_CURACION":   texturaAElegir = texturaPollo; break;
+                case "IMAN": 			 texturaAElegir = texturaIman; break;
+                case "COFRE_TESORO":			 texturaAElegir = texturaCofre; break;
+                // Añade texturaCofre o texturaIman aquí si ya las tienes declaradas
+            }
+
+            batch.draw(texturaAElegir, objeto.getX(), objeto.getY());
         }
 
         // Enemigos, Balas y Jugador
@@ -341,6 +429,10 @@ public class Principal extends ApplicationAdapter {
         }
         
         menuMejora.dibujar(batch, fuenteMenu, camera);
+        
+        for (Obstaculos obstaculo : listaObstaculos) {
+            obstaculo.dibujar(batch);
+        }
         
         batch.end();
 
@@ -388,5 +480,6 @@ public class Principal extends ApplicationAdapter {
         fuenteTexto.dispose();
         if (jugador != null) jugador.dispose();
         fuenteMenu.dispose();
+        texturaObstaculo.dispose();
     }
 }
