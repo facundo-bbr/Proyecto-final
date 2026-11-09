@@ -69,7 +69,7 @@ public class Recolector {
             case "GEMA_EXPERIENCIA":
                 exp.sumarExperiencia(objeto.getValor());
                 break;
-            case "POLLO_CURACION":
+            case "CURACION":
                 salud.curar(objeto.getValor());
                 break;
             case "COFRE_TESORO":

@@ -31,13 +31,16 @@ public class Principal extends ApplicationAdapter {
     private BitmapFont fuenteSurvival;
     private BitmapFont fuenteTexto;
 
-    private Texture texturaGema;
+    private Texture texturaGemaVerde;
     private Texture texturaBala;
     private Texture texturaCuchillo;
     private Texture texturaPincho;
     private Texture texturaPollo;
     private Texture texturaIman;
     private Texture texturaCofre;
+    private Texture texturaQueso;
+    private Texture texturaGemaRoja;
+
 
     // Entidad Jugador
     private Personaje jugador;
@@ -76,14 +79,16 @@ public class Principal extends ApplicationAdapter {
         fuenteSurvival.getData().setScale(1.5f);
         fuenteTexto = new BitmapFont();
 
-        texturaGema = new Texture("xpverde.png");
+        texturaGemaVerde = new Texture("xpverde.png");
         texturaBala = new Texture("bala.png");
-        texturaCuchillo=new Texture ("xprojo.png");
+        texturaCuchillo=new Texture ("Cuchillo.png");
         texturaPincho=new Texture ("Pincho.png");
-        texturaPollo=new Texture ("tilin.png");
+        texturaPollo=new Texture ("Pollo.png");
         texturaObstaculo= new Texture ("Barril.png");
         texturaIman = new Texture ("Iman.png");
         texturaCofre= new Texture ("Cofre.png");
+        texturaQueso= new Texture ("Queso.png");
+        texturaGemaRoja=new Texture ("xprojo.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -121,7 +126,7 @@ public class Principal extends ApplicationAdapter {
     @Override
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
-        
+        Texture texturaAElegir = texturaGemaVerde;
         if (!juegoIniciado) {
             ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
             
@@ -284,7 +289,7 @@ public class Principal extends ApplicationAdapter {
 
                             if (obstaculo.estaDestruido()) {
                                 // Suelta el objeto al suelo
-                                ObjetoSuelo loot = obstaculo.soltarObjeto(texturaGema,texturaPollo,texturaIman,texturaCofre); // Ajustado a tu método de la clase Obstaculos
+                                ObjetoSuelo loot = obstaculo.soltarObjeto(); // Ajustado a tu método de la clase Obstaculos
                                 if (loot != null) {
                                     listaObjetosSuelo.add(loot);
                                 }
@@ -314,10 +319,22 @@ public class Principal extends ApplicationAdapter {
                 if (enemigo.estaMuerto()) {
                     float centroZombiX = enemigo.getX() + (framesEnemigo[0].getRegionWidth() / 2f);
                     float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
-                    float gemaX = centroZombiX - (texturaGema.getWidth() / 2f);
-                    float gemaY = centroZombiY - (texturaGema.getHeight() / 2f);
+                    float gemaX = centroZombiX - (texturaGemaVerde.getWidth() / 2f);
+                    float gemaY = centroZombiY - (texturaGemaVerde.getHeight() / 2f);
 
-                    listaObjetosSuelo.add(new ObjetoSuelo(gemaX, gemaY, "GEMA_EXPERIENCIA", 15));
+                    // --- DECIDIR QUÉ SUELTA EL ENEMIGO AL MORIR ---
+                    // Por ejemplo, 80% de probabilidad de gema verde (baja) y 20% de gema roja (alta)
+                    String varianteGema = "VERDE";
+                    int valorExperiencia = 10;
+                    
+                    if (Math.random() < 0.20) { // 20% de probabilidad
+                        varianteGema = "ROJA";
+                        valorExperiencia = 35;  // Da más experiencia
+                    }
+
+                    // Creamos el objeto con su tipo, valor y variante específica
+                    listaObjetosSuelo.add(new ObjetoSuelo(gemaX, gemaY, "GEMA_EXPERIENCIA", valorExperiencia, varianteGema));
+                    
                     listaEnemigos.removeIndex(i);
                     continue;
                 }
@@ -344,7 +361,7 @@ public class Principal extends ApplicationAdapter {
                             obstaculo.recibirDano(bola.getDano());
 
                             if (obstaculo.estaDestruido()) {
-                                ObjetoSuelo loot = obstaculo.soltarObjeto(texturaGema,texturaPollo,texturaIman,texturaCofre);
+                                ObjetoSuelo loot = obstaculo.soltarObjeto();
                                 if (loot != null) {
                                     listaObjetosSuelo.add(loot);
                                 }
@@ -354,8 +371,7 @@ public class Principal extends ApplicationAdapter {
                         }
                     }
                 }
-            }
-        } // <--- FIN DEL BLOQUE ELSE (Aquí termina la congelación)
+            }        } // <--- FIN DEL BLOQUE ELSE (Aquí termina la congelación)
         
        
 
@@ -395,19 +411,34 @@ public class Principal extends ApplicationAdapter {
                 listaObjetosSuelo.removeIndex(i);
                 continue;
             }
-
-            // 3. Seleccionar la textura adecuada según el tipo de objeto
-            Texture texturaAElegir = texturaGema;
             switch (objeto.getTipo()) {
-                case "GEMA_EXPERIENCIA": texturaAElegir = texturaGema; break;
-                case "POLLO_CURACION":   texturaAElegir = texturaPollo; break;
-                case "IMAN": 			 texturaAElegir = texturaIman; break;
-                case "COFRE_TESORO":			 texturaAElegir = texturaCofre; break;
-                // Añade texturaCofre o texturaIman aquí si ya las tienes declaradas
-            }
-
-            batch.draw(texturaAElegir, objeto.getX(), objeto.getY());
+            case "GEMA_EXPERIENCIA": 
+                if (objeto.getVariante().equals("ROJA")) {
+                    texturaAElegir = texturaGemaRoja; // Asegúrate de tenerla declarada
+                } else {
+                    texturaAElegir = texturaGemaVerde;
+                }
+                break;
+                
+            case "CURACION":   
+                if (objeto.getVariante().equals("QUESO")) {
+                    texturaAElegir = texturaQueso; // Asegúrate de tenerla declarada
+                } else {
+                    texturaAElegir = texturaPollo;  // Asegúrate de tenerla declarada
+                }
+                break;
+                
+            case "IMAN": 			 
+                texturaAElegir = texturaIman; 
+                break;
+                
+            case "COFRE_TESORO":			 
+                texturaAElegir = texturaCofre; 
+                break;
         }
+
+        batch.draw(texturaAElegir, objeto.getX(), objeto.getY());
+    }
 
         // Enemigos, Balas y Jugador
         for (enemigos enemigo : listaEnemigos) {
@@ -474,7 +505,14 @@ public class Principal extends ApplicationAdapter {
         shapeRenderer.dispose();
         image.dispose();
         sheetEnemigo.dispose();
-        texturaGema.dispose();
+        texturaCuchillo.dispose();
+        texturaPincho.dispose();
+        if (texturaGemaVerde != null) texturaGemaVerde.dispose();
+        if (texturaGemaRoja != null) texturaGemaRoja.dispose();
+        if (texturaPollo != null) texturaPollo.dispose();
+        if (texturaQueso != null) texturaQueso.dispose();
+        if (texturaCofre != null) texturaCofre.dispose();
+        if (texturaIman != null) texturaIman.dispose();
         texturaBala.dispose();
         fuenteSurvival.dispose();
         fuenteTexto.dispose();

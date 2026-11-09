@@ -53,38 +53,56 @@ public class Obstaculos {
     }
 
     // Método que genera y suelta aleatoriamente un ObjetoSuelo al romperse
-    public ObjetoSuelo soltarObjeto(Texture texturaGema, Texture texturaPollo,Texture texturaIman,Texture texturaCofre) {
+    public ObjetoSuelo soltarObjeto() {
         if (!destruido) return null;
 
-        // Lista de tipos disponibles que maneja tu clase ObjetoSuelo
-        String[] tiposPosibles = { "GEMA_EXPERIENCIA", "POLLO_CURACION", "COFRE_TESORO", "IMAN" };
-        
-        // Elegimos un tipo al azar
+        String[] tiposPosibles = { "GEMA_EXPERIENCIA", "CURACION", "COFRE_TESORO", "IMAN" };
         String tipoSeleccionado = tiposPosibles[random.nextInt(tiposPosibles.length)];
-        int valorAsignado = 15; // Valor por defecto
+        
+        int valorAsignado = 10;
+        String varianteAsignada = "NORMAL";
 
-        // Asignamos valores específicos según el tipo de objeto
         switch (tipoSeleccionado) {
             case "GEMA_EXPERIENCIA":
-                valorAsignado = 20; // Cantidad de experiencia
+                // 70% de probabilidad de gema verde (baja), 30% de gema roja (alta)
+                if (random.nextFloat() < 0.7f) {
+                    varianteAsignada = "VERDE";
+                    valorAsignado = 15; // Poca experiencia
+                } else {
+                    varianteAsignada = "ROJA";
+                    valorAsignado = 50; // Mucha experiencia
+                }
                 break;
-            case "POLLO_CURACION":
-                valorAsignado = 25; // Puntos de vida a curar
+                
+            case "CURACION":
+                // Comida normal o comida grande
+                if (random.nextFloat() < 0.6f) {
+                    varianteAsignada = "POLLO";
+                    valorAsignado = 20; // Cura poco
+                } else {
+                    varianteAsignada = "QUESO";
+                    valorAsignado = 50; // Cura bastante
+                }
                 break;
+                
             case "COFRE_TESORO":
-                valorAsignado = 1;  // Indicador de cofre
+                varianteAsignada = "UNICO";
+                valorAsignado = 1;
                 break;
+                
             case "IMAN":
-                valorAsignado = 5;  // Segundos de duración del imán
+                varianteAsignada = "NORMAL";
+                valorAsignado = 5; // Duración en segundos
                 break;
         }
 
-        // Devolvemos el nuevo objeto en la misma posición central del obstáculo
         float centroX = x + (getAncho() / 2f);
         float centroY = y + (getAlto() / 2f);
 
-        return new ObjetoSuelo(centroX, centroY, tipoSeleccionado, valorAsignado);
+        return new ObjetoSuelo(centroX, centroY, tipoSeleccionado, valorAsignado, varianteAsignada);
     }
+
+      
 
     // Rectángulo de colisiones para detectar impactos de balas
     public Rectangle getBounds() {
