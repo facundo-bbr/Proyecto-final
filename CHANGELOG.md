@@ -1,3 +1,13 @@
+## [9-11-2026]
+-cambio
+
+-Se agrego la clase Obstáculos que se encarga de soltar objetos de suelo como el iman,pollo,cofre o gemas de experiencia
+
+-se agregaron las texturas del cofre e iman
+
+-se le agrego la logica al cofre para que de un arma aleatoria
+
+
 ## [6-11-2026]
 -cambio
 
