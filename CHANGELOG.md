@@ -7,6 +7,10 @@
 
 -se le agrego la logica al cofre para que de un arma aleatoria
 
+-Se agrego los objetos CURACION:Queso y Pollo
+
+-Se le agrego nuevas texturas a Cuchillo y BolaEspina
+
 
 ## [6-11-2026]
 -cambio
