@@ -7,6 +7,10 @@
 
 -Se agrego la lógica para que los enemigos no se sobrepongan entre si cuando persiguen al jugador y que no vayan al centro exacto del jugador ahora solo se acercan hasta que hacen daño
 
+-Se agregaron pasivas como Escudovich,MentiraColgala,Recatate y Corazon de ceda
+
+-Se mejoro el MenuMejora ahora siendo ahora clickeable y mas vistoso
+
 
 ## [9-11-2026]
 -cambio
