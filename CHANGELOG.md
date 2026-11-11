@@ -1,3 +1,13 @@
+## [11-11-2026]
+-cambio
+
+-Se agrego las clases de MenuDerrota,MenuPausa,MenuPrincipal,ArmaLanzallamas,ProyectilLlamarada,ZombieVerde,ZombieRojo y Esqueleto
+
+-Se agrego las texturas de Bolafuego,Zombie rojo y esqueleto
+
+-Se agrego la lógica para que los enemigos no se sobrepongan entre si cuando persiguen al jugador y que no vayan al centro exacto del jugador ahora solo se acercan hasta que hacen daño
+
+
 ## [9-11-2026]
 -cambio
 
