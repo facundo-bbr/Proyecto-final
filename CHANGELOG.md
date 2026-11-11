@@ -7,10 +7,11 @@
 
 -Se agrego la lógica para que los enemigos no se sobrepongan entre si cuando persiguen al jugador y que no vayan al centro exacto del jugador ahora solo se acercan hasta que hacen daño
 
--Se agregaron pasivas como Escudovich,MentiraColgala,Recatate y Corazon de ceda
+-Se agregaron pasivas como Escudovich,MentiraColgala,Recatate, Corazon de ceda y Corazon
 
 -Se mejoro el MenuMejora ahora siendo ahora clickeable y mas vistoso
 
+-Se agrego un nuevo token de xp:El azul que sera el peor entre las que ya habia
 
 ## [9-11-2026]
 -cambio
