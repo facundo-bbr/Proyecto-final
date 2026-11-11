@@ -14,11 +14,11 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.Input;
 
 public class Principal extends ApplicationAdapter {
     
 	private boolean juegoIniciado = false;
-    private boolean enMenuPrincipal = false;
     private BitmapFont fuenteMenu;
 	
 	private SpriteBatch batch;
@@ -35,6 +35,7 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaBala;
     private Texture texturaCuchillo;
     private Texture texturaPincho;
+    private Texture texturaBolafuego;
     private Texture texturaPollo;
     private Texture texturaIman;
     private Texture texturaCofre;
@@ -45,8 +46,11 @@ public class Principal extends ApplicationAdapter {
     // Entidad Jugador
     private Personaje jugador;
     
-    //Menu de subir de nivel
+    //Menus
     private MenuMejora menuMejora;
+    private MenuDerrota menuDerrota;
+    private MenuPrincipal menuPrincipal;
+    private MenuPausa menuPausa;
     
     // Listas del juego
     private Array<Proyectil> listaProyectiles = new Array<>();
@@ -55,8 +59,12 @@ public class Principal extends ApplicationAdapter {
     private Array<Obstaculos> listaObstaculos = new Array<>();
 
     // Recursos Enemigo
-    private Texture sheetEnemigo;
-    private TextureRegion[] framesEnemigo;
+    private Texture sheetZombieRojo;
+    private Texture sheetZombieVerde;
+    private Texture sheetEsqueleto;
+    private TextureRegion[] framesZombieVerde;
+    private TextureRegion[] framesZombieRojo;
+    private TextureRegion[] framesEsqueleto;
     private float temporizadorSpawneo;
     
     private Texture texturaObstaculo;
@@ -89,25 +97,32 @@ public class Principal extends ApplicationAdapter {
         texturaCofre= new Texture ("Cofre.png");
         texturaQueso= new Texture ("Queso.png");
         texturaGemaRoja=new Texture ("xprojo.png");
+        texturaBolafuego= new Texture ("Bolafuego.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
 
         // Carga de Sprites del Zombi
-        sheetEnemigo = new Texture(Gdx.files.internal("zombieverdeizq.png"));
-        TextureRegion[][] matrizCortesEnemigo = TextureRegion.split(sheetEnemigo, 60, 60);
-        int cantFramesZombi = sheetEnemigo.getWidth() / 60;
-        framesEnemigo = new TextureRegion[cantFramesZombi];
-        for (int i = 0; i < cantFramesZombi; i++) {
-            framesEnemigo[i] = matrizCortesEnemigo[0][i];
-        }
+        sheetZombieVerde = new Texture ("zombieverdeizq.png");
+        sheetZombieRojo = new Texture ("zombie der.png");
+        sheetEsqueleto = new Texture ("Esqueleto_der.png");
+
+        framesZombieVerde = cortarSprite(sheetZombieVerde, 60, 60);
+        framesZombieRojo = cortarSprite(sheetZombieRojo, 60, 60);
+        framesEsqueleto = cortarSprite(sheetEsqueleto, 60, 60);
 
         temporizadorSpawneo = 0f;
         
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho);
+        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho,texturaBolafuego);
+        
+        menuDerrota = new MenuDerrota();
+        
+        menuPrincipal = new MenuPrincipal();
+        
+        menuPausa = new MenuPausa();
         
         float anchoMapa = image.getWidth();
         float altoMapa = image.getHeight();
@@ -127,106 +142,56 @@ public class Principal extends ApplicationAdapter {
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Texture texturaAElegir = texturaGemaVerde;
-        if (!juegoIniciado) {
-            ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
-            
-            // IMPORTANTE: Sincronizamos la cámara para que el ancho sea exactamente 800x600
-            batch.setProjectionMatrix(camera.combined);
-            batch.begin();
-            
-            // Dibuja el mapa de fondo estático
-            batch.draw(image, 0, 0);
-
-            com.badlogic.gdx.graphics.g2d.GlyphLayout layout = new com.badlogic.gdx.graphics.g2d.GlyphLayout();
-
-            if (!enMenuPrincipal) {
-                // PANTALLA 1: "Press to Play"
-                fuenteMenu.setColor(Color.RED);
-                fuenteMenu.getData().setScale(2.0f);
-                String textoTitulo = "VAMPIRE SURVIVORS - JAVA";
-                layout.setText(fuenteMenu, textoTitulo);
-                float xTitulo = (camera.viewportWidth - layout.width) / 2f; // Centrado exacto usando la cámara
-                fuenteMenu.draw(batch, textoTitulo, xTitulo, 380);
-
-                fuenteMenu.setColor(Color.WHITE);
-                fuenteMenu.getData().setScale(1.2f);
-                String textoPress = "PRESS ANY KEY OR CLICK TO START";
-                layout.setText(fuenteMenu, textoPress);
-                float xPress = (camera.viewportWidth - layout.width) / 2f; // Centrado exacto
-                fuenteMenu.draw(batch, textoPress, xPress, 300);
-
-                // Detectar clic o tecla para pasar al menú de botones
-                if (Gdx.input.isTouched() || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ANY_KEY)) {
-                    enMenuPrincipal = true;
-                }
-            } else {
-                // PANTALLA 2: Botones PLAY y CONFIGURACIÓN
-                fuenteMenu.setColor(Color.YELLOW);
-                fuenteMenu.getData().setScale(2.0f); // Escala grande para el título
-                String textoMenu = "MENU PRINCIPAL";
-                layout.setText(fuenteMenu, textoMenu);
-                float xMenu = (camera.viewportWidth - layout.width) / 2f;
-                fuenteMenu.draw(batch, textoMenu, xMenu, 420);
-
-                // Cambiamos a escala 1.5f para los botones y medimos bien su centrado
-                fuenteMenu.getData().setScale(1.5f);
-                fuenteMenu.setColor(Color.WHITE);
-
-                String textoPlay = "> PLAY <";
-                layout.setText(fuenteMenu, textoPlay);
-                float xPlay = (camera.viewportWidth - layout.width) / 2f;
-                fuenteMenu.draw(batch, textoPlay, xPlay, 320);
-
-                String textoConfig = "> CONFIGURACION <";
-                layout.setText(fuenteMenu, textoConfig);
-                float xConfig = (camera.viewportWidth - layout.width) / 2f;
-                fuenteMenu.draw(batch, textoConfig, xConfig, 240);
-
-                // 1. Control por Teclado
-                if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.NUM_1) || Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ENTER)) {
-                    juegoIniciado = true; // ¡Arranca el juego!
-                } else if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.NUM_2)) {
-                    System.out.println("Configuración abierta");
-                }
-
-                // 2. Control por Clic del Mouse mapeado con la cámara
-                if (Gdx.input.justTouched()) {
-                    com.badlogic.gdx.math.Vector3 touchPos = new com.badlogic.gdx.math.Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-                    camera.unproject(touchPos);
-
-                    float mouseX = touchPos.x;
-                    float mouseY = touchPos.y;
-
-                    // Rango horizontal centrado (de 200 a 600) y vertical exacto para cada opción
-                    if (mouseX >= 200 && mouseX <= 600) {
-                        // Botón PLAY (Y: 280 a 330)
-                        if (mouseY >= 280 && mouseY <= 330) {
-                            juegoIniciado = true;
-                        }
-                        // Botón CONFIGURACIÓN (Y: 200 a 250)
-                        else if (mouseY >= 200 && mouseY <= 250) {
-                            System.out.println("Configuración abierta");
-                        }
-                    }
-                }
+        int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image); // <--- Le pasamos 'image'
+        if (menuDerrota.isActivo()) {
+            if (accionMenu == 1) {
+                reiniciarJuego();
+                menuDerrota.desactivar();
+            } else if (accionMenu == 2) {
+                Gdx.app.exit();
             }
-
-            batch.end();
-            return; 
+            return;
+        }
+       
+        if (!juegoIniciado) {
+            // Le pasamos los objetos necesarios y evaluamos si retorna true (pulsó Play)
+            juegoIniciado = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
+            return; // Detiene el bucle para que no corra la lógica del juego por detrás
         }
         
+	        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && juegoIniciado && !jugador.estaMuerto() && !menuMejora.isActivo()) {
+	            if (menuPausa.isActivo()) {
+	                menuPausa.desactivar();
+	            } else {
+	                menuPausa.activar(camera);
+	            }
+	        }
+        
+	        if (menuPausa.isActivo()) {
+	            int accionPausa = menuPausa.manejarInputYRender(batch, camera, fuenteMenu, image);
+	            if (accionPausa == 1) {
+	                // Continuar juego (se cierra solo)
+	            } else if (accionPausa == 2) {
+	                reiniciarJuego();
+	                juegoIniciado = false; // Vuelve al menú principal
+	                menuPausa.desactivar();
+	            } else if (accionPausa == 3) {
+	                Gdx.app.exit(); // Cierra el programa
+	            }
+	            return; 
+	        }
 
 
         if (jugador.estaMuerto()) {
-            if (!yaMurio) {
+        	if (!menuDerrota.isActivo()) {
                 System.out.println("¡Game Over!");
-                yaMurio = true;
+                menuDerrota.activar(camera);
             }
             return;
         }
 
-        float centroPjX = jugador.getCentroX();
-        float centroPjY = jugador.getCentroY();
+        float centroPjX = jugador.getCentroX()+(jugador.getAncho() / 2f);
+        float centroPjY = jugador.getCentroY()+(jugador.getAlto() / 2f);
      // 1. COMPROBAR SI HAY NIVELES PENDIENTES PARA ABRIR EL MENÚ
         if (jugador.getGestorExperiencia().tieneNivelesPendientes() && !menuMejora.isActivo()) {
             menuMejora.abrir();
@@ -247,10 +212,20 @@ public class Principal extends ApplicationAdapter {
             jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles);
 
 
-            // Spawneo de enemigos
+         // Spawneo de enemigos
             temporizadorSpawneo += deltaTime;
             if (temporizadorSpawneo > 1.5f) {
-                listaEnemigos.add(new enemigos(framesEnemigo, centroPjX, centroPjY));
+                // Elegimos un tipo de enemigo al azar (0, 1 o 2)
+                int tipoEnemigo = com.badlogic.gdx.math.MathUtils.random(0, 2);
+
+                if (tipoEnemigo == 0) {
+                    listaEnemigos.add(new ZombieVerde(framesZombieVerde, centroPjX, centroPjY));
+                } else if (tipoEnemigo == 1) {
+                    listaEnemigos.add(new ZombieRojo(framesZombieRojo, centroPjX, centroPjY));
+                } else {
+                    listaEnemigos.add(new Esqueleto(framesEsqueleto, centroPjX, centroPjY));
+                }
+
                 temporizadorSpawneo = 0f;
             }
 
@@ -272,8 +247,13 @@ public class Principal extends ApplicationAdapter {
                     if (p.getBounds().overlaps(enemigo.getBounds())) {
                         enemigo.recibirDano(p.getDano());
                         impacto = true;
-                        p.destruir();
-                        break;
+                        
+                        // Si ES un ProyectilLlamarada, NO lo destruimos al golpear enemigos (atraviesa)
+                        if (!(p instanceof ProyectilLlamarada)) {
+                            p.destruir();
+                            break; // Rompemos el bucle de enemigos porque la bala normal murió
+                        }
+                        // Las llamaradas continúan y pueden golpear a varios enemigos a la vez
                     }
                 }
 
@@ -285,7 +265,12 @@ public class Principal extends ApplicationAdapter {
                         if (p.getBounds().overlaps(obstaculo.getBounds())) {
                             obstaculo.recibirDano(p.getDano());
                             impacto = true;
-                            p.destruir(); // El proyectil desaparece al impactar
+                            
+                            // Opcional: ¿Quieres que el lanzallamas atraviese los obstáculos o choque con ellos?
+                            // Si quieres que el lanzallamas tampoco muera con los obstáculos, envuélvelo igual:
+                            if (!(p instanceof ProyectilLlamarada)) {
+                                p.destruir(); // El proyectil normal desaparece al impactar
+                            }
 
                             if (obstaculo.estaDestruido()) {
                                 // Suelta el objeto al suelo
@@ -299,31 +284,32 @@ public class Principal extends ApplicationAdapter {
                         }
                     }
                 }
-
                 // Si el proyectil impactó contra algo o se desactivó, lo eliminamos de la lista
-                if (impacto || !p.isActivo()) {
+                if ((impacto && !(p instanceof ProyectilLlamarada)) || !p.isActivo()) {
                     listaProyectiles.removeIndex(i);
                 }
             }
             
            
             
-            // Colisiones: Persecución y Ataque del Enemigo al Jugador
-            float objetivoX = centroPjX - (framesEnemigo[0].getRegionWidth() / 2f);
-            float objetivoY = centroPjY - (framesEnemigo[0].getRegionHeight() / 2f);
+         // Colisiones: Persecución y Ataque del Enemigo al Jugador
+            float objetivoX = centroPjX; // O ajusta si usas el centro exacto
+            float objetivoY = centroPjY;
 
             for (int i = listaEnemigos.size - 1; i >= 0; i--) {
                 enemigos enemigo = listaEnemigos.get(i);
-                enemigo.perseguir(objetivoX, objetivoY, deltaTime); // Se mueven solo aquí
+                enemigo.actualizar(deltaTime);
+                enemigo.perseguir(objetivoX, objetivoY, deltaTime,listaEnemigos); // Se mueven solo aquí
 
                 if (enemigo.estaMuerto()) {
-                    float centroZombiX = enemigo.getX() + (framesEnemigo[0].getRegionWidth() / 2f);
-                    float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
-                    float gemaX = centroZombiX - (texturaGemaVerde.getWidth() / 2f);
-                    float gemaY = centroZombiY - (texturaGemaVerde.getHeight() / 2f);
+                    // Obtenemos el rectángulo de colisión o centro del enemigo actual de forma segura
+                    float centroEnemigoX = enemigo.getX() + (enemigo.getBounds().width / 2f);
+                    float centroEnemigoY = enemigo.getY() + (enemigo.getBounds().height / 2f);
+                    
+                    float gemaX = centroEnemigoX - (texturaGemaVerde.getWidth() / 2f);
+                    float gemaY = centroEnemigoY - (texturaGemaVerde.getHeight() / 2f);
 
                     // --- DECIDIR QUÉ SUELTA EL ENEMIGO AL MORIR ---
-                    // Por ejemplo, 80% de probabilidad de gema verde (baja) y 20% de gema roja (alta)
                     String varianteGema = "VERDE";
                     int valorExperiencia = 10;
                     
@@ -339,9 +325,11 @@ public class Principal extends ApplicationAdapter {
                     continue;
                 }
 
-                float centroZombiX = enemigo.getX() + (framesEnemigo[0].getRegionWidth() / 2f);
-                float centroZombiY = enemigo.getY() + (framesEnemigo[0].getRegionHeight() / 2f);
-                if (Vector2.dst(centroPjX, centroPjY, centroZombiX, centroZombiY) < 45f) {
+                // Comprobar daño al jugador usando las dimensiones del enemigo actual
+                float centroEnemigoX = enemigo.getX() + (enemigo.getBounds().width / 2f);
+                float centroEnemigoY = enemigo.getY() + (enemigo.getBounds().height / 2f);
+                
+                if (Vector2.dst(centroPjX, centroPjY, centroEnemigoX, centroEnemigoY) < 45f) {
                     jugador.recibirDano(10);
                 }
             }
@@ -407,7 +395,7 @@ public class Principal extends ApplicationAdapter {
             // 2. Comprobar si el jugador lo toca para recogerlo usando el método correcto de tu Recolector
             float distanciaJugador = Vector2.dst(centroPjX, centroPjY, objeto.getX(), objeto.getY());
             if (distanciaJugador <= 25f && !objeto.estaRecogido()) {
-                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(),texturaCuchillo,texturaPincho,jugador);
+                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(),texturaCuchillo,texturaPincho,jugador,texturaBolafuego);
                 listaObjetosSuelo.removeIndex(i);
                 continue;
             }
@@ -504,9 +492,11 @@ public class Principal extends ApplicationAdapter {
         batch.dispose();
         shapeRenderer.dispose();
         image.dispose();
-        sheetEnemigo.dispose();
-        texturaCuchillo.dispose();
-        texturaPincho.dispose();
+        if (sheetZombieVerde != null) sheetZombieVerde.dispose();
+        if (sheetZombieRojo != null) sheetZombieRojo.dispose();
+        if (sheetEsqueleto != null) sheetEsqueleto.dispose();
+        if (texturaCuchillo != null) texturaCuchillo.dispose();
+        if (texturaPincho != null) texturaPincho.dispose();
         if (texturaGemaVerde != null) texturaGemaVerde.dispose();
         if (texturaGemaRoja != null) texturaGemaRoja.dispose();
         if (texturaPollo != null) texturaPollo.dispose();
@@ -518,6 +508,80 @@ public class Principal extends ApplicationAdapter {
         fuenteTexto.dispose();
         if (jugador != null) jugador.dispose();
         fuenteMenu.dispose();
-        texturaObstaculo.dispose();
+        if (texturaObstaculo != null) {
+            texturaObstaculo.dispose();
+        }
+        if (menuDerrota != null) menuDerrota.dispose();
+        if (texturaBolafuego != null) texturaBolafuego.dispose();
+        if (menuPausa != null) {
+            menuPausa.dispose();
+        }
+    }
+    
+    @Override
+    public void resume() {
+        super.resume();
+
+        // 1. Recargar la textura del fondo principal (o mapa) si es la que se pone negra
+        if (image != null) {
+            image.dispose(); // Limpiamos la referencia anterior por seguridad
+        }
+        image = new Texture("mapa.jpg"); // Reemplaza con la ruta real de tu imagen de fondo
+        
+        if (menuDerrota != null) {
+            menuDerrota.recargarRecursos();
+        }
+        // 2. Si tienes otras texturas globales críticas en Principal.java, recárgalas aquí también.
+        // Por ejemplo, si el jugador o los enemigos cargan texturas estáticas globales, haz lo mismo:
+        // if (texturaJugador != null) {
+        //     texturaJugador.dispose();
+        //     texturaJugador = new Texture("jugador.png");
+        // }
+    }
+    
+    private TextureRegion[] cortarSprite(Texture sheet, int tileWidth, int tileHeight) {
+        TextureRegion[][] matrizCortes = TextureRegion.split(sheet, tileWidth, tileHeight);
+        int cantFrames = sheet.getWidth() / tileWidth;
+        TextureRegion[] framesResultado = new TextureRegion[cantFrames];
+        for (int i = 0; i < cantFrames; i++) {
+            framesResultado[i] = matrizCortes[0][i];
+        }
+        return framesResultado;
+    }
+    
+    private void reiniciarJuego() {
+        // 1. Volver al estado de menú principal y apagar el menú de derrota
+        juegoIniciado = false; 
+        if (menuDerrota != null) {
+            menuDerrota.desactivar();
+        }
+
+        // 2. Recentrar la cámara en el origen del mapa
+        camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
+        camera.update();
+
+        // 3. REINICIAR AL JUGADOR CREANDO UNA NUEVA INSTANCIA
+        // (Ajusta los parámetros según lo que requiera el constructor de tu clase Jugador)
+        float centroX = camera.viewportWidth / 2f;
+        float centroY = camera.viewportHeight / 2f;
+        jugador = new Personaje(centroX, centroY,texturaBala); // Esto resetea vida, armas y estadísticas automáticamente
+
+        // 4. REINICIAR EL TIEMPO
+        tiempoJuego = 0f; 
+        temporizadorSpawneo = 0f;
+
+        // 5. LIMPIAR LAS LISTAS DE ENTIDADES (Enemigos, objetos en suelo, etc.)
+        if (listaEnemigos != null) {
+            listaEnemigos.clear();
+        }
+        
+        if (listaObjetosSuelo != null) {
+            listaObjetosSuelo.clear();
+        }
+
+        // ¡AQUÍ ESTÁ LA LIMPIEZA DE PROYECTILES!
+        if (listaProyectiles != null) {
+            listaProyectiles.clear();
+        }
     }
 }

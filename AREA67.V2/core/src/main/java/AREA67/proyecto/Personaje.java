@@ -98,6 +98,8 @@
 	                // Si el arma es un Fusil, le actualizamos su dirección antes de que actualice su reloj
 	                if (arma instanceof Fusil) {
 	                    ((Fusil) arma).setDireccion(direccionMirada);
+	                }else if (arma instanceof ArmaLanzallamas) {
+	                    ((ArmaLanzallamas) arma).setDireccion(direccionMirada);
 	                }
 	                // Todas las armas (incluido el fusil y el cuchillo) usan el actualizar normal con cadencia
 	                arma.actualizar(deltaTime, centroX, centroY, listaEnemigos, listaProyectiles);

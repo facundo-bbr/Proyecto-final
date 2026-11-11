@@ -18,10 +18,12 @@ public class MenuMejora {
     
     private Texture texturaCuchillo;
     private Texture texturaPincho;
+    private Texture texturaBolafuego;
 
-    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho) {
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho,Texture texturaBolafuego) {
         this.texturaCuchillo = texturaCuchillo;
         this.texturaPincho = texturaPincho;
+        this.texturaBolafuego = texturaBolafuego;
     }
 
     public void abrir() {
@@ -44,7 +46,8 @@ public class MenuMejora {
             "Aumentar +15% Velocidad de Movimiento", // Tipo 2
             "Aumentar Rango de Recoleccion de Gemas", // Tipo 3
             "Equipar Cuchillo Teledirigido",         // Tipo 4
-            "Equipar Bola de Pinchos"                // Tipo 5
+            "Equipar Bola de Pinchos",				// Tipo 5
+            "Equipar Lanzallamas"					//tipo 6
         };
 
         for (int i = 0; i < 3; i++) {
@@ -128,6 +131,22 @@ public class MenuMejora {
                 }
                 if (!equipadoBola) {
                     System.out.println("¡Arsenal lleno! No se pudo equipar la Bola de Pinchos.");
+                }
+                break;
+            
+            case 6: // CASO LANZALLAMAS
+                boolean equipadoLanzallamas = false;
+                for (int i = 0; i < jugador.getArsenal().length; i++) {
+                    if (jugador.getArsenal()[i] == null) {
+                        // Nombre, Daño base, Cadencia (ej: 0.5s), Cantidad de proyectiles por disparo, Textura del fuego
+                        jugador.getArsenal()[i] = new ArmaLanzallamas(texturaBolafuego);
+                        equipadoLanzallamas = true;
+                        System.out.println("¡Lanzallamas equipado en el espacio " + i + "!");
+                        break;
+                    }
+                }
+                if (!equipadoLanzallamas) {
+                    System.out.println("¡Arsenal lleno! No se pudo equipar el Lanzallamas.");
                 }
                 break;
         }

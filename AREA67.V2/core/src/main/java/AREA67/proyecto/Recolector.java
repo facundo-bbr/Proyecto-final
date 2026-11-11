@@ -60,7 +60,7 @@ public class Recolector {
     }
 
     // CAMBIADO A PUBLIC para poder llamarlo desde tu bucle principal al chocar con objetos
-    public void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud, Texture texturaCuchillo,Texture texturaPincho,Personaje jugador) {
+    public void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud, Texture texturaCuchillo,Texture texturaPincho,Personaje jugador,Texture texturaBolafuego) {
         if (objeto.estaRecogido()) return;
         
         objeto.marcarComoRecogido();
@@ -82,9 +82,12 @@ public class Recolector {
                         if (tipoArmaRandom == 0) {
                             arsenal[i] = new ArmaCuchillo(texturaCuchillo);
                             System.out.println("¡Cuchillo obtenido del cofre!");
-                        } else {
+                        } else if (tipoArmaRandom == 1) {
                             arsenal[i] = new BolaPinchos(texturaPincho);
                             System.out.println("¡Bola de pinchos obtenida del cofre!");
+                        }else {
+                        	 arsenal[i] = new ArmaLanzallamas(texturaBolafuego);
+                             System.out.println("¡Bola de pinchos obtenida del cofre!");
                         }
                         equipado = true;
                         break;
