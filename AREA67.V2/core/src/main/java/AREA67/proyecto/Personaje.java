@@ -32,6 +32,7 @@
 	    GestorExperiencia exp = new GestorExperiencia();
 	    Recolector recolector = new Recolector(70f);
 	    Arma[] arsenal = new Arma[6];
+	    private float multiplicadorDañoRecibido = 1.0f;
 	
 	    // Constructor predeterminado (compatibilidad)
 	    public Personaje() {
@@ -111,6 +112,15 @@
 	            salud.curar(99999);
 	        }
 	    }
+	    public void aplicarReducionDano(float porcentaje) {
+	        // Reducimos el multiplicador. Si recibe un 10% menos, su multiplicador baja (ej. de 1.0 a 0.9)
+	        this.multiplicadorDañoRecibido -= porcentaje;
+	        
+	        // Opcional: poner un límite para que nunca sea invulnerable (ej. máximo 70% de reducción -> 0.3f)
+	        if (this.multiplicadorDañoRecibido < 0.3f) {
+	            this.multiplicadorDañoRecibido = 0.3f;
+	        }
+	    }
 	    private void procesarEntrada(float deltaTime) {
 	        float speed = velocidadMovimiento * deltaTime;
 	        seEstaMoviendo = false;
@@ -159,8 +169,22 @@
 	        }
 	    }
 	
-	    public void recibirDano(int cantidad) {
-	        salud.aplicardano(cantidad);
+	    public void recibirDano(int danoBase) {
+	        // Calculamos el daño real aplicando la reducción defensiva
+	        int dañoFinal = (int) (danoBase * multiplicadorDañoRecibido);
+	        
+	        // Aseguramos que al menos reciba 1 de daño si la vida debe restarse
+	        if (dañoFinal < 1 && danoBase > 0) {
+	            dañoFinal = 1; 
+	        }
+
+	        // Restableces el daño utilizando tu gestor de vida habitual
+	        if (salud != null) {
+	            salud.aplicardano(dañoFinal);
+	        } else {
+	            // O si lo manejas directamente con una variable de vida:
+	            // vidaActual -= dañoFinal;
+	        }
 	    }
 	
 	    public boolean estaMuerto() {

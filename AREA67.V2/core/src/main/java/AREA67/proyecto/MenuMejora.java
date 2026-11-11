@@ -8,6 +8,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 
 public class MenuMejora {
     
@@ -15,15 +18,33 @@ public class MenuMejora {
     private String[] opciones = new String[3];
     private int[] tipoMejora = new int[3]; 
     private GlyphLayout layout = new GlyphLayout();
+    private ShapeRenderer shapeRenderer;
     
+    // Rectángulos de las 3 tarjetas para la interfaz y clics del mouse
+    private Rectangle[] rectTarjetas = new Rectangle[3];
+    
+    // Texturas de armas e iconos para estadísticas
     private Texture texturaCuchillo;
     private Texture texturaPincho;
     private Texture texturaBolafuego;
+    private Texture texturaEstadistica; 
+    private Texture texturaRecatate;
+    private Texture texturaEscudovich;
+    private Texture texturaCorazonCeda;
 
-    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho,Texture texturaBolafuego) {
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaEstadistica,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda) {
         this.texturaCuchillo = texturaCuchillo;
         this.texturaPincho = texturaPincho;
         this.texturaBolafuego = texturaBolafuego;
+        this.texturaEstadistica = texturaEstadistica;
+        this.texturaRecatate = texturaRecatate;
+        this.texturaEscudovich = texturaEscudovich;
+        this.texturaCorazonCeda = texturaCorazonCeda;
+        this.shapeRenderer = new ShapeRenderer();
+        
+        for (int i = 0; i < 3; i++) {
+            rectTarjetas[i] = new Rectangle(0, 0, 460, 65);
+        }
     }
 
     public void abrir() {
@@ -41,25 +62,132 @@ public class MenuMejora {
 
     private void generarOpcionesAleatorias() {
         String[] poolDescripciones = {
-            "Aumentar +20% Daño de Armas",          // Tipo 0
+            "Recatate (+20% Daño de Armas)",          // Tipo 0
             "Curar Vida Completa",                  // Tipo 1
-            "Aumentar +15% Velocidad de Movimiento", // Tipo 2
-            "Aumentar Rango de Recoleccion de Gemas", // Tipo 3
-            "Equipar Cuchillo Teledirigido",         // Tipo 4
-            "Equipar Bola de Pinchos",				// Tipo 5
-            "Equipar Lanzallamas"					//tipo 6
+            "Mentira Colgala(+15% Velocidad de Movimiento)", // Tipo 2
+            "Aumentar Rango de Recoleccion",        // Tipo 3
+            "Cuchillos",        // Tipo 4
+            "Bola de Pinchos",              // Tipo 5
+            "Lanzallamas",                   // Tipo 6
+            "Escudovich(Reducir Daño Recibido un 10%)",
+            "Corazon de Ceda (+20 HP max)"
         };
 
+        com.badlogic.gdx.utils.Array<Integer> indicesDisponibles = new com.badlogic.gdx.utils.Array<>();
+        for (int i = 0; i < poolDescripciones.length; i++) {
+            indicesDisponibles.add(i);
+        }
+        indicesDisponibles.shuffle();
+
         for (int i = 0; i < 3; i++) {
-            int index = (int) (Math.random() * poolDescripciones.length);
+            int index = indicesDisponibles.get(i);
             opciones[i] = poolDescripciones[index];
             tipoMejora[i] = index;
         }
     }
 
-    public void manejarEntrada(Personaje jugador) {
+    private Texture obtenerIconoParaTipo(int tipo) {
+        switch (tipo) {
+        	case 0: return texturaRecatate;
+            case 4: return texturaCuchillo;
+            case 5: return texturaPincho;
+            case 6: return texturaBolafuego;
+            case 7: return texturaEscudovich;
+            case 8: return texturaCorazonCeda;
+            default: return texturaEstadistica; 
+        }
+    }
+
+    // Método unificado idéntico al de MenuDerrota para manejar input y renderizado a la vez
+    public void manejarInputYRender(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuente, Texture fondoMapa, Personaje jugador) {
         if (!activo) return;
 
+        camera.update();
+        float camX = camera.position.x;
+        float camY = camera.position.y;
+        float viewW = camera.viewportWidth;
+        float viewH = camera.viewportHeight;
+
+        // 0. DIBUJAR EL FONDO PRIMERO (Para que nunca quede en negro)
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+        if (fondoMapa != null) {
+            batch.draw(fondoMapa, 0, 0); 
+        }
+        batch.end();
+
+        // Posiciones centrales de las 3 tarjetas en base a la cámara actual
+        float anchoCard = 460;
+        float altoCard = 65;
+        float xCard = camX - (anchoCard / 2f);
+        float[] yCards = {
+            camY + 45,   // Superior
+            camY - 25,   // Central
+            camY - 95    // Inferior
+        };
+
+        for (int i = 0; i < 3; i++) {
+            rectTarjetas[i].set(xCard, yCards[i], anchoCard, altoCard);
+        }
+
+        // 1. DIBUJAR LOS RECTÁNGULOS DE LAS TARJETAS (Fondo y Bordes Dorados)
+        shapeRenderer.setProjectionMatrix(camera.combined);
+        
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(0.35f, 0.35f, 0.45f, 1f); // Color de la tarjeta
+        for (int i = 0; i < 3; i++) {
+            shapeRenderer.rect(rectTarjetas[i].x, rectTarjetas[i].y, rectTarjetas[i].width, rectTarjetas[i].height);
+        }
+        shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(0.85f, 0.75f, 0.3f, 1f); // Borde dorado
+        for (int i = 0; i < 3; i++) {
+            shapeRenderer.rect(rectTarjetas[i].x, rectTarjetas[i].y, rectTarjetas[i].width, rectTarjetas[i].height);
+        }
+        shapeRenderer.end();
+
+        // 2. DIBUJAR LOS TEXTOS E ICONOS
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
+
+        // TÍTULO "Level Up!"
+        fuente.setColor(Color.WHITE);
+        fuente.getData().setScale(2.2f);
+        String titulo = "Level Up!";
+        layout.setText(fuente, titulo);
+        float xTitulo = camX - (layout.width / 2f);
+        float yTitulo = camY + 160;
+        fuente.draw(batch, titulo, xTitulo, yTitulo);
+
+        // Textos y elementos de las tarjetas
+        fuente.getData().setScale(1.1f);
+
+        for (int i = 0; i < 3; i++) {
+            float tarjetaX = rectTarjetas[i].x;
+            float tarjetaY = rectTarjetas[i].y;
+
+            // Icono independiente
+            Texture icono = obtenerIconoParaTipo(tipoMejora[i]);
+            if (icono != null) {
+                float iconoSize = 45;
+                float iconoX = tarjetaX + 12;
+                float iconoY = tarjetaY + (altoCard - iconoSize) / 2f;
+                batch.draw(icono, iconoX, iconoY, iconoSize, iconoSize);
+            }
+
+            // Texto de la opción
+            fuente.setColor(Color.WHITE);
+            String textoOpcion = "[" + (i + 1) + "] " + opciones[i];
+            
+            float textoX = tarjetaX + 70;
+            float textoY = tarjetaY + (altoCard / 2f) + 5;
+            fuente.draw(batch, textoOpcion, textoX, textoY);
+        }
+
+        batch.end();
+
+        // 3. DETECTAR ENTRADA (Teclado o Clics del Mouse)
         int seleccion = -1;
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -70,15 +198,26 @@ public class MenuMejora {
             seleccion = 2;
         }
 
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
+            camera.unproject(touchPos);
+
+            for (int i = 0; i < 3; i++) {
+                if (rectTarjetas[i].contains(touchPos.x, touchPos.y)) {
+                    seleccion = i;
+                    break;
+                }
+            }
+        }
+
         if (seleccion != -1) {
             aplicarMejora(seleccion, jugador);
-            cerrar(); 
+            cerrar();
         }
     }
 
     private void aplicarMejora(int index, Personaje jugador) {
         int tipo = tipoMejora[index];
-        System.out.println("¡Mejora seleccionada: " + opciones[index] + " !");
         
         switch (tipo) {
             case 0:
@@ -88,91 +227,59 @@ public class MenuMejora {
                     }
                 }
                 break;
-                
             case 1:
                 jugador.curarAlMaximo();
-                System.out.println("¡Vida restaurada al máximo!");
                 break;
-                
             case 2:
                 Personaje.velocidadMovimiento += 25f;
                 break;
-                
             case 3:
                 if (jugador.getRecolector() != null) {
                     jugador.getRecolector().mejorarRango(15f);
                 }
                 break;
-
             case 4:
-                boolean equipado = false;
                 for (int i = 0; i < jugador.getArsenal().length; i++) {
                     if (jugador.getArsenal()[i] == null) {
                         jugador.getArsenal()[i] = new ArmaCuchillo(texturaCuchillo);
-                        equipado = true;
-                        System.out.println("¡Cuchillo equipado en el espacio " + i + "!");
                         break;
                     }
                 }
-                if (!equipado) {
-                    System.out.println("¡Arsenal lleno! No se pudo equipar el cuchillo.");
-                }
                 break;
-                
             case 5:
-                boolean equipadoBola = false;
                 for (int i = 0; i < jugador.getArsenal().length; i++) {
                     if (jugador.getArsenal()[i] == null) {
                         jugador.getArsenal()[i] = new BolaPinchos(texturaPincho);
-                        equipadoBola = true;
-                        System.out.println("¡Bola de Pinchos equipada en el espacio " + i + "!");
                         break;
                     }
-                }
-                if (!equipadoBola) {
-                    System.out.println("¡Arsenal lleno! No se pudo equipar la Bola de Pinchos.");
                 }
                 break;
-            
-            case 6: // CASO LANZALLAMAS
-                boolean equipadoLanzallamas = false;
+            case 6:
                 for (int i = 0; i < jugador.getArsenal().length; i++) {
                     if (jugador.getArsenal()[i] == null) {
-                        // Nombre, Daño base, Cadencia (ej: 0.5s), Cantidad de proyectiles por disparo, Textura del fuego
                         jugador.getArsenal()[i] = new ArmaLanzallamas(texturaBolafuego);
-                        equipadoLanzallamas = true;
-                        System.out.println("¡Lanzallamas equipado en el espacio " + i + "!");
                         break;
                     }
                 }
-                if (!equipadoLanzallamas) {
-                    System.out.println("¡Arsenal lleno! No se pudo equipar el Lanzallamas.");
+                break;
+            case 7:
+                // Aplicamos la reducción de daño (puedes crear un método en tu clase Personaje o gestionar un multiplicador)
+                jugador.aplicarReducionDano(0.10f); // Reduce un 10% el daño recibido acumulativamente
+                break;
+            case 8:
+                // Aumenta la vida máxima y opcionalmente cura al jugador esa misma cantidad
+                if (jugador.getGestorVida() != null) {
+                    jugador.getGestorVida().aumentarVidaMaxima(20);
                 }
                 break;
         }
 
-        // Consumimos el nivel pendiente para que el juego continúe con normalidad
         jugador.getGestorExperiencia().consumirNivelPendiente();
     }
 
-    public void dibujar(SpriteBatch batch, BitmapFont fuente, OrthographicCamera camera) {
-        if (!activo) return;
-
-        float camX = camera.position.x;
-        float camY = camera.position.y;
-
-        fuente.setColor(Color.CYAN);
-        fuente.getData().setScale(2.0f);
-        String titulo = "¡SUBISTE DE NIVEL! ELIGE UNA MEJORA";
-        layout.setText(fuente, titulo);
-        fuente.draw(batch, titulo, camX - (layout.width / 2f), camY + 120);
-
-        fuente.getData().setScale(1.4f);
-        for (int i = 0; i < 3; i++) {
-            fuente.setColor(i == 0 ? Color.YELLOW : (i == 1 ? Color.GREEN : Color.ORANGE));
-            String textoOpcion = "[" + (i + 1) + "] " + opciones[i];
-            layout.setText(fuente, textoOpcion);
-            fuente.draw(batch, textoOpcion, camX - (layout.width / 2f), camY + 40 - (i * 50));
+    public void dispose() {
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
         }
     }
 }

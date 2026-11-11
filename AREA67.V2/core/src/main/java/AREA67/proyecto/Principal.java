@@ -41,6 +41,11 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaCofre;
     private Texture texturaQueso;
     private Texture texturaGemaRoja;
+    private Texture texturaCorazonCeda;
+    private Texture texturaRecatate;
+    private Texture texturaImancito;
+    private Texture texturaColgala;
+    private Texture texturaEscudovich;
 
 
     // Entidad Jugador
@@ -98,6 +103,11 @@ public class Principal extends ApplicationAdapter {
         texturaQueso= new Texture ("Queso.png");
         texturaGemaRoja=new Texture ("xprojo.png");
         texturaBolafuego= new Texture ("Bolafuego.png");
+        texturaCorazonCeda= new Texture ("CorazonCeda.png");
+        texturaEscudovich = new Texture ("Escudovich.png");
+        texturaRecatate= new Texture ("Recatate.png");
+        texturaColgala = new Texture ("tilin.png");
+        
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -116,7 +126,7 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho,texturaBolafuego);
+        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho,texturaBolafuego,texturaColgala,texturaRecatate,texturaEscudovich,texturaCorazonCeda);
         
         menuDerrota = new MenuDerrota();
         
@@ -203,7 +213,7 @@ public class Principal extends ApplicationAdapter {
         // 2. CONTROLAR EL FLUJO: Menú Activo vs Lógica del Juego
         if (menuMejora.isActivo()) {
             // El menú está abierto: congelamos TODO el juego y solo manejamos el menú
-            menuMejora.manejarEntrada(jugador);
+            //menuMejora.manejarEntrada(jugador,camera);
         } else {
             // --- TODO ESTE BLOQUE SE CONGELA CUANDO EL MENÚ ESTÁ ABIERTO ---
             tiempoJuego += deltaTime; 
@@ -378,57 +388,64 @@ public class Principal extends ApplicationAdapter {
         camera.position.y = MathUtils.clamp(camera.position.y, halfCamH, image.getHeight() - halfCamH);
         camera.update();
 
-        // 4. RENDERIZADO (SPRITE BATCH)
+     // 4. RENDERIZADO (SPRITE BATCH)
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
+        // A. Fondo del mapa
         batch.draw(image, 0, 0);
 
-     // Actualizar y dibujar objetos del suelo (Gemas, Pollos, Cofres, Imanes)
+        // B. Obstáculos del mapa
+        for (Obstaculos obstaculo : listaObstaculos) {
+            obstaculo.dibujar(batch);
+        }
+
+        // C. Objetos del suelo (Gemas, Pollos, Cofres, Imanes)
         for (int i = listaObjetosSuelo.size - 1; i >= 0; i--) {
             ObjetoSuelo objeto = listaObjetosSuelo.get(i);
 
             // 1. Mover hacia el jugador si está dentro del rango del imán
             jugador.getRecolector().actualizarObjeto(objeto, deltaTime, centroPjX, centroPjY);
 
-            // 2. Comprobar si el jugador lo toca para recogerlo usando el método correcto de tu Recolector
+            // 2. Comprobar si el jugador lo toca para recogerlo
             float distanciaJugador = Vector2.dst(centroPjX, centroPjY, objeto.getX(), objeto.getY());
             if (distanciaJugador <= 25f && !objeto.estaRecogido()) {
-                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(),texturaCuchillo,texturaPincho,jugador,texturaBolafuego);
+                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(), texturaCuchillo, texturaPincho, jugador, texturaBolafuego);
                 listaObjetosSuelo.removeIndex(i);
                 continue;
             }
+            
             switch (objeto.getTipo()) {
-            case "GEMA_EXPERIENCIA": 
-                if (objeto.getVariante().equals("ROJA")) {
-                    texturaAElegir = texturaGemaRoja; // Asegúrate de tenerla declarada
-                } else {
-                    texturaAElegir = texturaGemaVerde;
-                }
-                break;
-                
-            case "CURACION":   
-                if (objeto.getVariante().equals("QUESO")) {
-                    texturaAElegir = texturaQueso; // Asegúrate de tenerla declarada
-                } else {
-                    texturaAElegir = texturaPollo;  // Asegúrate de tenerla declarada
-                }
-                break;
-                
-            case "IMAN": 			 
-                texturaAElegir = texturaIman; 
-                break;
-                
-            case "COFRE_TESORO":			 
-                texturaAElegir = texturaCofre; 
-                break;
+                case "GEMA_EXPERIENCIA": 
+                    if (objeto.getVariante().equals("ROJA")) {
+                        texturaAElegir = texturaGemaRoja; 
+                    } else {
+                        texturaAElegir = texturaGemaVerde;
+                    }
+                    break;
+                    
+                case "CURACION":   
+                    if (objeto.getVariante().equals("QUESO")) {
+                        texturaAElegir = texturaQueso; 
+                    } else {
+                        texturaAElegir = texturaPollo;  
+                    }
+                    break;
+                    
+                case "IMAN": 			 
+                    texturaAElegir = texturaIman; 
+                    break;
+                    
+                case "COFRE_TESORO":			 
+                    texturaAElegir = texturaCofre; 
+                    break;
+            }
+
+            batch.draw(texturaAElegir, objeto.getX(), objeto.getY());
         }
 
-        batch.draw(texturaAElegir, objeto.getX(), objeto.getY());
-    }
-
-        // Enemigos, Balas y Jugador
+        // D. Enemigos, Proyectiles y Jugador
         for (enemigos enemigo : listaEnemigos) {
             enemigo.dibujar(batch);
         }
@@ -438,21 +455,19 @@ public class Principal extends ApplicationAdapter {
 
         jugador.dibujar(batch);
 
-        // HUD Texto
-        dibujarUIHUD();
-        
+        // E. Armas adicionales (como Bola de Pinchos)
         for (Arma arma : jugador.arsenal) {
             if (arma instanceof BolaPinchos) {
                 ((BolaPinchos) arma).dibujar(batch);
             }
         }
+
+        // F. HUD de texto del juego
+        dibujarUIHUD();
         
-        menuMejora.dibujar(batch, fuenteMenu, camera);
-        
-        for (Obstaculos obstaculo : listaObstaculos) {
-            obstaculo.dibujar(batch);
-        }
-        
+        // ¡IMPORTANTE! Quitamos el menuMejora.dibujar de aquí adentro para que no rompa el batch principal.
+
+        // Cerramos el batch principal de forma limpia
         batch.end();
 
         // 5. RENDERIZADO (SHAPE RENDERER - BARRAS SOBRE EL JUGADOR)
@@ -460,9 +475,16 @@ public class Principal extends ApplicationAdapter {
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         jugador.dibujarUI(shapeRenderer);
         shapeRenderer.end();
-        
 
+        // =========================================================================
+        // 6. MENÚ DE MEJORA (Se dibuja al final de todo y gestiona su propio batch/shapes)
+        // =========================================================================
+        if (menuMejora.isActivo()) {
+            menuMejora.manejarInputYRender(batch, camera, fuenteMenu, image, jugador);
+            return;
+        }
     }
+    
 
     private void dibujarUIHUD() {
         int minutos = (int) (tiempoJuego / 60);
