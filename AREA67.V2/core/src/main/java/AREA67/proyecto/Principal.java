@@ -30,7 +30,9 @@ public class Principal extends ApplicationAdapter {
     private float tiempoJuego;
     private BitmapFont fuenteSurvival;
     private BitmapFont fuenteTexto;
-
+    
+    private Texture texturaGemaAzul;
+    private Texture texturaGemaRoja;
     private Texture texturaGemaVerde;
     private Texture texturaBala;
     private Texture texturaCuchillo;
@@ -40,12 +42,12 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaIman;
     private Texture texturaCofre;
     private Texture texturaQueso;
-    private Texture texturaGemaRoja;
     private Texture texturaCorazonCeda;
     private Texture texturaRecatate;
     private Texture texturaImancito;
     private Texture texturaColgala;
     private Texture texturaEscudovich;
+    private Texture texturaCorazon;
 
 
     // Entidad Jugador
@@ -106,8 +108,10 @@ public class Principal extends ApplicationAdapter {
         texturaCorazonCeda= new Texture ("CorazonCeda.png");
         texturaEscudovich = new Texture ("Escudovich.png");
         texturaRecatate= new Texture ("Recatate.png");
-        texturaColgala = new Texture ("tilin.png");
-        
+        texturaColgala = new Texture ("Colgala.png");
+        texturaCorazon = new Texture ("Corazon.png");
+        texturaGemaAzul = new Texture ("xpazul.png");
+        texturaImancito= new Texture ("tilin.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -126,7 +130,7 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho,texturaBolafuego,texturaColgala,texturaRecatate,texturaEscudovich,texturaCorazonCeda);
+        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho,texturaBolafuego,texturaColgala,texturaRecatate,texturaEscudovich,texturaCorazonCeda,texturaCorazon,texturaImancito);
         
         menuDerrota = new MenuDerrota();
         

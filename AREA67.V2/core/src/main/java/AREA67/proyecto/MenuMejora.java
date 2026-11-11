@@ -27,19 +27,23 @@ public class MenuMejora {
     private Texture texturaCuchillo;
     private Texture texturaPincho;
     private Texture texturaBolafuego;
-    private Texture texturaEstadistica; 
+    private Texture texturaColgala; 
     private Texture texturaRecatate;
     private Texture texturaEscudovich;
     private Texture texturaCorazonCeda;
+    private Texture texturaCorazon;
+    private Texture texturaImancito;
 
-    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaEstadistica,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda) {
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,Texture texturaImancito) {
         this.texturaCuchillo = texturaCuchillo;
         this.texturaPincho = texturaPincho;
         this.texturaBolafuego = texturaBolafuego;
-        this.texturaEstadistica = texturaEstadistica;
+        this.texturaColgala = texturaColgala;
         this.texturaRecatate = texturaRecatate;
         this.texturaEscudovich = texturaEscudovich;
         this.texturaCorazonCeda = texturaCorazonCeda;
+        this.texturaCorazon= texturaCorazon;
+        this.texturaImancito= texturaImancito;
         this.shapeRenderer = new ShapeRenderer();
         
         for (int i = 0; i < 3; i++) {
@@ -89,12 +93,14 @@ public class MenuMejora {
     private Texture obtenerIconoParaTipo(int tipo) {
         switch (tipo) {
         	case 0: return texturaRecatate;
+        	case 1: return texturaCorazon;
+        	case 2: return texturaColgala;
             case 4: return texturaCuchillo;
             case 5: return texturaPincho;
             case 6: return texturaBolafuego;
             case 7: return texturaEscudovich;
             case 8: return texturaCorazonCeda;
-            default: return texturaEstadistica; 
+            default: return texturaImancito; 
         }
     }
 
