@@ -31,8 +31,9 @@
 	    GestorVida salud = new GestorVida(100);
 	    GestorExperiencia exp = new GestorExperiencia();
 	    Recolector recolector = new Recolector(70f);
-	    Arma[] arsenal = new Arma[6];
+	    Arma[] arsenal = new Arma[5];
 	    private float multiplicadorDañoRecibido = 1.0f;
+	    private int contadorReducionDano = 0;
 	
 	    // Constructor predeterminado (compatibilidad)
 	    public Personaje() {
@@ -112,15 +113,22 @@
 	            salud.curar(99999);
 	        }
 	    }
+	    
+	    public int getContadorReducionDano() {
+	        return contadorReducionDano;
+	    }
+	    
+	    public void incrementarContadorReducionDano() {
+	        this.contadorReducionDano++;
+	    }
+	    
 	    public void aplicarReducionDano(float porcentaje) {
-	        // Reducimos el multiplicador. Si recibe un 10% menos, su multiplicador baja (ej. de 1.0 a 0.9)
 	        this.multiplicadorDañoRecibido -= porcentaje;
-	        
-	        // Opcional: poner un límite para que nunca sea invulnerable (ej. máximo 70% de reducción -> 0.3f)
-	        if (this.multiplicadorDañoRecibido < 0.3f) {
-	            this.multiplicadorDañoRecibido = 0.3f;
+	        if (this.multiplicadorDañoRecibido < 0.7f) {
+	            this.multiplicadorDañoRecibido = 0.7f; // Tope del 30% de reducción total acumulada
 	        }
 	    }
+	    
 	    private void procesarEntrada(float deltaTime) {
 	        float speed = velocidadMovimiento * deltaTime;
 	        seEstaMoviendo = false;

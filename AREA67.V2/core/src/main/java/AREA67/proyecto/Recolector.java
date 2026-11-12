@@ -73,27 +73,59 @@ public class Recolector {
                 salud.curar(objeto.getValor());
                 break;
             case "COFRE_TESORO":
-            	Arma[] arsenal = jugador.getArsenal();
-                boolean equipado = false;
-                int tipoArmaRandom = (int) (Math.random() * 2); 
-
-                for (int i = 0; i < arsenal.length; i++) {
-                    if (arsenal[i] == null) {
-                        if (tipoArmaRandom == 0) {
-                            arsenal[i] = new ArmaCuchillo(texturaCuchillo);
-                            System.out.println("¡Cuchillo obtenido del cofre!");
-                        } else if (tipoArmaRandom == 1) {
-                            arsenal[i] = new BolaPinchos(texturaPincho);
-                            System.out.println("¡Bola de pinchos obtenida del cofre!");
-                        }else {
-                        	 arsenal[i] = new ArmaLanzallamas(texturaBolafuego);
-                             System.out.println("¡Bola de pinchos obtenida del cofre!");
+                Arma[] arsenal = jugador.getArsenal();
+                int tipoArmaRandom = (int) (Math.random() * 3); // 0, 1 o 2 (3 armas en total)
+                
+                // 1. Verificamos si el jugador ya posee esa arma específica para mejorarla
+                boolean armaEncontrada = false;
+                
+                if (tipoArmaRandom == 0) {
+                    for (Arma arma : arsenal) {
+                        if (arma instanceof ArmaCuchillo) {
+                            ((ArmaCuchillo) arma).aplicarMejoraProgresiva();
+                            System.out.println("¡Cuchillo mejorado desde el cofre!");
+                            armaEncontrada = true;
+                            break;
                         }
-                        equipado = true;
-                        break;
+                    }
+                } else if (tipoArmaRandom == 1) {
+                    for (Arma arma : arsenal) {
+                        if (arma instanceof BolaPinchos) {
+                            ((BolaPinchos) arma).aplicarMejoraProgresiva();
+                            System.out.println("¡Bola de pinchos mejorada desde el cofre!");
+                            armaEncontrada = true;
+                            break;
+                        }
+                    }
+                } else {
+                    for (Arma arma : arsenal) {
+                        if (arma instanceof ArmaLanzallamas) {
+                            ((ArmaLanzallamas) arma).aplicarMejoraProgresiva();
+                            System.out.println("¡Lanzallamas mejorado desde el cofre!");
+                            armaEncontrada = true;
+                            break;
+                        }
                     }
                 }
-                if (!equipado) System.out.println("¡Arsenal lleno!");
+                
+                // 2. Si no la tenía equipada, buscamos un espacio libre para dársela de cero
+                if (!armaEncontrada) {
+                    for (int i = 0; i < arsenal.length; i++) {
+                        if (arsenal[i] == null) {
+                            if (tipoArmaRandom == 0) {
+                                arsenal[i] = new ArmaCuchillo(texturaCuchillo);
+                                System.out.println("¡Cuchillo obtenido del cofre!");
+                            } else if (tipoArmaRandom == 1) {
+                                arsenal[i] = new BolaPinchos(texturaPincho);
+                                System.out.println("¡Bola de pinchos obtenida del cofre!");
+                            } else {
+                                arsenal[i] = new ArmaLanzallamas(texturaBolafuego);
+                                System.out.println("¡Lanzallamas obtenido del cofre!");
+                            }
+                            break;
+                        }
+                    }
+                }
                 break;
             case "IMAN":
                 activarIman(objeto.getValor());

@@ -28,6 +28,8 @@ public class Principal extends ApplicationAdapter {
     private OrthographicCamera camera;
 
     private float tiempoJuego;
+    private float intervaloJefe = 120f;        // 120 segundos = 2 minutos
+    private float tiempoUltimoJefe = 0f;       // Controla cuándo apareció el último jefe
     private BitmapFont fuenteSurvival;
     private BitmapFont fuenteTexto;
     
@@ -59,6 +61,7 @@ public class Principal extends ApplicationAdapter {
     private MenuPausa menuPausa;
     
     // Listas del juego
+    private Array<Jefe> listaJefes= new Array<>();;
     private Array<Proyectil> listaProyectiles = new Array<>();
     private Array<enemigos> listaEnemigos = new Array<>();
     private Array<ObjetoSuelo> listaObjetosSuelo = new Array<>();
@@ -68,6 +71,12 @@ public class Principal extends ApplicationAdapter {
     private Texture sheetZombieRojo;
     private Texture sheetZombieVerde;
     private Texture sheetEsqueleto;
+    private	Texture sheetCaminarJefe;
+    private Texture sheetAtaqueJefe;
+    private Array<TextureRegion> framesJefeCaminar;
+    private Array<TextureRegion> framesJefeAtaque;
+    private TextureRegion[] arrCaminar;
+    private TextureRegion[] arrAtaque;
     private TextureRegion[] framesZombieVerde;
     private TextureRegion[] framesZombieRojo;
     private TextureRegion[] framesEsqueleto;
@@ -90,6 +99,7 @@ public class Principal extends ApplicationAdapter {
         camera.setToOrtho(false, 800, 600);
 
         tiempoJuego = 0f;
+        
         fuenteSurvival = new BitmapFont();
         fuenteSurvival.getData().setScale(1.5f);
         fuenteTexto = new BitmapFont();
@@ -111,7 +121,9 @@ public class Principal extends ApplicationAdapter {
         texturaColgala = new Texture("Colgala.png");
         texturaCorazon = new Texture("Corazon.png");
         texturaGemaAzul = new Texture("xpazul.png");
-        texturaImancito = new Texture("tilin.png");
+        texturaImancito = new Texture("Imancito.png");
+        sheetCaminarJefe = new Texture("jefearea67.png");
+        sheetAtaqueJefe = sheetCaminarJefe;
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -124,6 +136,12 @@ public class Principal extends ApplicationAdapter {
         framesZombieVerde = cortarSprite(sheetZombieVerde, 60, 60);
         framesZombieRojo = cortarSprite(sheetZombieRojo, 60, 60);
         framesEsqueleto = cortarSprite(sheetEsqueleto, 60, 60);
+        //arrCaminar = cortarSprite(sheetCaminarJefe, 96, 96);
+        //arrAtaque = cortarSprite(sheetAtaqueJefe, 96, 96);
+        TextureRegion[] arrFramesProvisionales = cortarSprite(sheetCaminarJefe, 96, 96);
+        
+        framesJefeCaminar = new Array<>(arrFramesProvisionales);
+        framesJefeAtaque = new Array<>(arrFramesProvisionales);
 
         temporizadorSpawneo = 0f;
         
@@ -148,7 +166,8 @@ public class Principal extends ApplicationAdapter {
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Texture texturaAElegir = texturaGemaVerde;
-        int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image); 
+        int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image);
+        boolean juegoPausado = menuMejora.isActivo() || menuPausa.isActivo() || menuDerrota.isActivo() || !juegoIniciado;
         if (menuDerrota.isActivo()) {
             if (accionMenu == 1) {
                 reiniciarJuego();
@@ -202,10 +221,13 @@ public class Principal extends ApplicationAdapter {
         }
 
         // Control del Flujo: Menú de Mejora Activo vs Lógica del Juego
-        if (menuMejora.isActivo()) {
-            // Congelado mientras elige mejora
-        } else {
-            tiempoJuego += deltaTime; 
+        	if (!juegoPausado){
+            tiempoJuego += deltaTime;
+            
+            if (tiempoJuego - tiempoUltimoJefe >= intervaloJefe) {
+                spawnearJefe();
+                tiempoUltimoJefe = tiempoJuego; // Reiniciamos el conteo para los próximos 2 minutos
+            }
 
             // Actualizar movimiento, armas y cooldowns del jugador (movimiento libre)
             jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles);
@@ -315,12 +337,20 @@ public class Principal extends ApplicationAdapter {
                     float gemaX = centroEnemigoX - (texturaGemaVerde.getWidth() / 2f);
                     float gemaY = centroEnemigoY - (texturaGemaVerde.getHeight() / 2f);
 
-                    String varianteGema = "VERDE";
+                    String varianteGema = "AZUL";
                     int valorExperiencia = 10;
                     
-                    if (Math.random() < 0.20) {
+                    double probabilidad = Math.random();
+
+                    if (probabilidad < 0.10) {          // 10% de probabilidad (Gema Rara)
                         varianteGema = "ROJA";
-                        valorExperiencia = 35;  
+                        valorExperiencia = 50;  
+                    } else if (probabilidad < 0.35) {   // 25% de probabilidad (Gema Mediana - del 10% al 35%)
+                        varianteGema = "VERDE";
+                        valorExperiencia = 25;  
+                    } else {                            // 65% restante (Gema Común)
+                        varianteGema = "AZUL";
+                        valorExperiencia = 10;  
                     }
 
                     listaObjetosSuelo.add(new ObjetoSuelo(gemaX, gemaY, "GEMA_EXPERIENCIA", valorExperiencia, varianteGema));
@@ -358,8 +388,18 @@ public class Principal extends ApplicationAdapter {
                         }
                     }
                 }
-            }         
+            }
+            if (listaJefes != null) {
+                for (int i = 0; i < listaJefes.size; i++) {
+                    Jefe jefe = listaJefes.get(i);
+                    if (jefe != null) {
+                        jefe.actualizar(deltaTime, centroPjX, centroPjY, jugador);
+                    }
+                }
+            }
+        
         } 
+        	//------------------------------------------------------------
 
         // =========================================================================
         // CÁMARA E INFINITO (Sin límites ni clamp, siguiendo libremente al jugador)
@@ -413,8 +453,10 @@ public class Principal extends ApplicationAdapter {
                 case "GEMA_EXPERIENCIA": 
                     if (objeto.getVariante().equals("ROJA")) {
                         texturaAElegir = texturaGemaRoja; 
-                    } else {
+                    } else if (objeto.getVariante().equals("VERDE")) {
                         texturaAElegir = texturaGemaVerde;
+                    } else {
+                    	texturaAElegir = texturaGemaAzul;
                     }
                     break;
                     
@@ -442,6 +484,14 @@ public class Principal extends ApplicationAdapter {
         for (enemigos enemigo : listaEnemigos) {
             enemigo.dibujar(batch);
         }
+        if (listaJefes != null) {
+            for (int i = 0; i < listaJefes.size; i++) {
+                Jefe jefe = listaJefes.get(i);
+                if (jefe != null) {
+                    jefe.dibujar(batch);
+                }
+            }
+        }
         for (Proyectil b : listaProyectiles) {
             b.dibujar(batch);
         }
@@ -464,6 +514,14 @@ public class Principal extends ApplicationAdapter {
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         jugador.dibujarUI(shapeRenderer);
+        if (listaJefes != null) {
+            for (int i = 0; i < listaJefes.size; i++) {
+                Jefe jefe = listaJefes.get(i);
+                if (jefe != null) {
+                    jefe.dibujarOndaExpansiva(shapeRenderer);
+                }
+            }
+        }	
         shapeRenderer.end();
 
         // 6. MENÚ DE MEJORA
@@ -525,6 +583,8 @@ public class Principal extends ApplicationAdapter {
         if (menuPausa != null) {
             menuPausa.dispose();
         }
+        if (sheetCaminarJefe != null) sheetCaminarJefe.dispose();
+        if (sheetAtaqueJefe != null && sheetAtaqueJefe != sheetCaminarJefe) sheetAtaqueJefe.dispose();
     }
     
     @Override
@@ -579,5 +639,29 @@ public class Principal extends ApplicationAdapter {
         if (listaProyectiles != null) {
             listaProyectiles.clear();
         }
+        if (listaJefes != null) {
+            listaJefes.clear();
+        }
+        tiempoUltimoJefe = 0f;
     }
+    
+    private void spawnearJefe() {
+        // Protección por si los arrays no se cargaron bien
+        if (framesJefeCaminar == null || framesJefeAtaque == null || listaJefes == null) {
+            System.out.println("Error: Las texturas del Jefe o la lista no están inicializadas.");
+            return;
+        }
+
+        float offsetX = (Math.random() > 0.5f ? 1 : -1) * (camera.viewportWidth / 2f + 100);
+        float offsetY = (Math.random() > 0.5f ? 1 : -1) * (camera.viewportHeight / 2f + 100);
+        
+        float jefeX = jugador.getX() + offsetX;
+        float jefeY = jugador.getY() + offsetY;
+
+        Jefe nuevoJefe = new Jefe(framesJefeCaminar, framesJefeAtaque, jefeX, jefeY);
+        listaJefes.add(nuevoJefe);
+
+        System.out.println("¡AVISO: Un Jefe ha aparecido en el mapa!");
+    }
+    
 }

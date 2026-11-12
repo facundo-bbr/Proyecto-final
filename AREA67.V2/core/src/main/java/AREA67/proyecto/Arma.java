@@ -7,6 +7,7 @@ public abstract class Arma {
     protected int dano;
     protected float cadenciaAtaque;
     protected float tiempoRestante;
+    private int contadorMejorasArma = 0;
 
     public Arma(String nombre, int dano, float cadenciaAtaque) {
         this.nombre = nombre;
@@ -34,4 +35,25 @@ public abstract class Arma {
     public float getCadenciaAtaque() { return cadenciaAtaque; }
     public float getTiempoRestante() { return tiempoRestante; }
     public void setCadenciaAtaque(float cadenciaAtaque) { this.cadenciaAtaque = cadenciaAtaque; }
+    public void aplicarMejoraProgresiva() {
+        contadorMejorasArma++;
+        
+        if (contadorMejorasArma <= 3) {
+            // Primeras 3 veces: Aumenta el daño en 10
+            this.dano += 15;
+            System.out.println("¡Arma mejorada! Daño aumentado a: " + this.dano);
+        } else if (contadorMejorasArma <= 5) {
+            // Veces 4 y 5: Reduce el tiempo entre disparos (cooldown)
+            this.cadenciaAtaque -= 0.15f; // Ajusta este valor según la escala de tiempo de tu juego
+            // Asegúrate de que el cooldown no baje de un límite seguro (ej. 0.1f)
+            if (this.cadenciaAtaque < 0.1f) {
+                this.cadenciaAtaque = 0.1f;
+            }
+            System.out.println("¡Arma mejorada! Cooldown reducido a: " + this.cadenciaAtaque);
+        } else {
+            // Si ya superó las 5 mejoras, puedes darle un extra genérico de daño
+            this.dano += 5;
+            System.out.println("¡Arma mejorada al máximo nivel! Daño extra: " + this.dano);
+        }
+    }
 }

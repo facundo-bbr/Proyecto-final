@@ -61,24 +61,28 @@ public class Obstaculos {
         
         int valorAsignado = 10;
         String varianteAsignada = "NORMAL";
+        float probabilidad = random.nextFloat(); // o MathUtils.random() según uses en tu clase
 
         switch (tipoSeleccionado) {
             case "GEMA_EXPERIENCIA":
                 // 70% de probabilidad de gema verde (baja), 30% de gema roja (alta)
-                if (random.nextFloat() < 0.7f) {
-                    varianteAsignada = "VERDE";
-                    valorAsignado = 15; // Poca experiencia
-                } else {
-                    varianteAsignada = "ROJA";
-                    valorAsignado = 50; // Mucha experiencia
-                }
+            	if (probabilidad < 0.15f) {          // 15% de probabilidad (Variante Roja - Muy valiosa)
+            	    varianteAsignada = "ROJA";
+            	    valorAsignado = 50; 
+            	} else if (probabilidad < 0.50f) {   // 35% de probabilidad (Variante Verde - Intermedia, desde el 15% hasta el 50%)
+            	    varianteAsignada = "VERDE";
+            	    valorAsignado = 25; 
+            	} else {                            // El 50% restante (Variante Azul - Común)
+            	    varianteAsignada = "AZUL";
+            	    valorAsignado = 10; 
+            	}
                 break;
                 
             case "CURACION":
                 // Comida normal o comida grande
                 if (random.nextFloat() < 0.6f) {
                     varianteAsignada = "POLLO";
-                    valorAsignado = 20; // Cura poco
+                    valorAsignado = 30; // Cura poco
                 } else {
                     varianteAsignada = "QUESO";
                     valorAsignado = 50; // Cura bastante

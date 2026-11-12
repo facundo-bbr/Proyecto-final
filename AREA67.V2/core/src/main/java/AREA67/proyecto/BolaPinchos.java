@@ -19,7 +19,7 @@ public class BolaPinchos extends Arma {
     private float temporizadorCiclo = 0f; // Reloj interno del ciclo
 
     public BolaPinchos(Texture texturaBola) {
-        super("Bola de Pinchos", 150, 0f); 
+        super("Bola de Pinchos", 120, 0f); 
         this.texturaBola = texturaBola;
         this.angulo = 0f;
     }

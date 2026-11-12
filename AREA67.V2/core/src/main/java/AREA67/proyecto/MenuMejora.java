@@ -237,40 +237,83 @@ public class MenuMejora {
                 jugador.curarAlMaximo();
                 break;
             case 2:
-                Personaje.velocidadMovimiento += 25f;
+                Personaje.velocidadMovimiento += 15f;
                 break;
             case 3:
                 if (jugador.getRecolector() != null) {
                     jugador.getRecolector().mejorarRango(15f);
                 }
                 break;
-            case 4:
-                for (int i = 0; i < jugador.getArsenal().length; i++) {
-                    if (jugador.getArsenal()[i] == null) {
-                        jugador.getArsenal()[i] = new ArmaCuchillo(texturaCuchillo);
+            case 4: // Cuchillo Teledirigido
+                ArmaCuchillo cuchilloExistente = null;
+                for (Arma arma : jugador.getArsenal()) {
+                    if (arma instanceof ArmaCuchillo) {
+                        cuchilloExistente = (ArmaCuchillo) arma;
                         break;
                     }
                 }
-                break;
-            case 5:
-                for (int i = 0; i < jugador.getArsenal().length; i++) {
-                    if (jugador.getArsenal()[i] == null) {
-                        jugador.getArsenal()[i] = new BolaPinchos(texturaPincho);
-                        break;
+                
+                if (cuchilloExistente != null) {
+                    cuchilloExistente.aplicarMejoraProgresiva(); // Llama a su propia lógica interna
+                } else {
+                    for (int i = 0; i < jugador.getArsenal().length; i++) {
+                        if (jugador.getArsenal()[i] == null) {
+                            jugador.getArsenal()[i] = new ArmaCuchillo(texturaCuchillo);
+                            break;
+                        }
                     }
                 }
                 break;
-            case 6:
-                for (int i = 0; i < jugador.getArsenal().length; i++) {
-                    if (jugador.getArsenal()[i] == null) {
-                        jugador.getArsenal()[i] = new ArmaLanzallamas(texturaBolafuego);
+           
+            case 5: // Bola de Pinchos
+                BolaPinchos pinchosExistente = null;
+                for (Arma arma : jugador.getArsenal()) {
+                    if (arma instanceof BolaPinchos) {
+                        pinchosExistente = (BolaPinchos) arma;
                         break;
                     }
                 }
+                
+                if (pinchosExistente != null) {
+                    pinchosExistente.aplicarMejoraProgresiva();
+                } else {
+                    for (int i = 0; i < jugador.getArsenal().length; i++) {
+                        if (jugador.getArsenal()[i] == null) {
+                            jugador.getArsenal()[i] = new BolaPinchos(texturaPincho);
+                            break;
+                        }
+                    }
+                }
                 break;
-            case 7:
-                // Aplicamos la reducción de daño (puedes crear un método en tu clase Personaje o gestionar un multiplicador)
-                jugador.aplicarReducionDano(0.10f); // Reduce un 10% el daño recibido acumulativamente
+                
+            case 6: // Lanzallamas
+                ArmaLanzallamas lanzallamasExistente = null;
+                for (Arma arma : jugador.getArsenal()) {
+                    if (arma instanceof ArmaLanzallamas) {
+                        lanzallamasExistente = (ArmaLanzallamas) arma;
+                        break;
+                    }
+                }
+                
+                if (lanzallamasExistente != null) {
+                    lanzallamasExistente.aplicarMejoraProgresiva();
+                } else {
+                    for (int i = 0; i < jugador.getArsenal().length; i++) {
+                        if (jugador.getArsenal()[i] == null) {
+                            jugador.getArsenal()[i] = new ArmaLanzallamas(texturaBolafuego);
+                            break;
+                        }
+                    }
+                }
+                break;
+                
+            case 7: // Reducción de daño (Límite 3 veces / 0.30)
+                if (jugador.getContadorReducionDano() < 3) {
+                    jugador.aplicarReducionDano(0.10f);
+                    jugador.incrementarContadorReducionDano();
+                } else {
+                    System.out.println("Llegaste al limite de reduccion de daño");
+                }
                 break;
             case 8:
                 // Aumenta la vida máxima y opcionalmente cura al jugador esa misma cantidad
