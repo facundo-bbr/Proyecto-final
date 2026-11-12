@@ -59,6 +59,7 @@ public class Principal extends ApplicationAdapter {
     private MenuDerrota menuDerrota;
     private MenuPrincipal menuPrincipal;
     private MenuPausa menuPausa;
+    private MenuOpciones menuOpciones;
     
     // Listas del juego
     private Array<Jefe> listaJefes= new Array<>();;
@@ -152,6 +153,7 @@ public class Principal extends ApplicationAdapter {
         menuDerrota = new MenuDerrota();
         menuPrincipal = new MenuPrincipal();
         menuPausa = new MenuPausa();
+        menuOpciones = new MenuOpciones();
         
         // Generar obstáculos iniciales distribuidos libremente alrededor del centro
         int cantidadObstaculos = 15;
@@ -167,7 +169,13 @@ public class Principal extends ApplicationAdapter {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Texture texturaAElegir = texturaGemaVerde;
         int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image);
-        boolean juegoPausado = menuMejora.isActivo() || menuPausa.isActivo() || menuDerrota.isActivo() || !juegoIniciado;
+        boolean juegoPausado = menuMejora.isActivo() || menuPausa.isActivo() || menuDerrota.isActivo() || menuOpciones.isActivo() || !juegoIniciado;        if (menuOpciones.isActivo()) {
+            boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
+            if (salirOpciones) {
+                // Vuelve al flujo normal
+            }
+            return;
+        }
         if (menuDerrota.isActivo()) {
             if (accionMenu == 1) {
                 reiniciarJuego();
@@ -177,12 +185,22 @@ public class Principal extends ApplicationAdapter {
             }
             return;
         }
-       
+        if (menuOpciones.isActivo()) {
+            boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
+            if (salirOpciones) {
+                // Al volver de opciones, se desacriva solo
+            }
+            return;
+        }
         if (!juegoIniciado) {
-            juegoIniciado = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
+            int accionMenuP = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
+            if (accionMenuP == 1) {
+                juegoIniciado = true; // Arranca el juego
+            } else if (accionMenuP == 2) {
+                menuOpciones.activar(); // ¡Abre el menú de configuración/opciones!
+            }
             return; 
         }
-        
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && juegoIniciado && !jugador.estaMuerto() && !menuMejora.isActivo()) {
             if (menuPausa.isActivo()) {
                 menuPausa.desactivar();

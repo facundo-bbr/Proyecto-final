@@ -8,85 +8,108 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MenuPrincipal {
     private boolean enMenuPrincipal;
     private GlyphLayout layout;
+    private ShapeRenderer shapeRenderer;
+    
+    private Rectangle rectPlay;
+    private Rectangle rectConfig;
+    private Rectangle rectSalir;
 
     public MenuPrincipal() {
-         this.enMenuPrincipal = false;
+        this.enMenuPrincipal = false;
         this.layout = new GlyphLayout();
+        this.shapeRenderer = new ShapeRenderer();
+        
+        this.rectPlay = new Rectangle(250, 310, 300, 45);
+        this.rectConfig = new Rectangle(250, 240, 300, 45);
+        this.rectSalir = new Rectangle(250, 170, 300, 45);
     }
 
     /**
-     * Maneja el renderizado y los clics/teclas del menú de inicio.
-     * @return true si el jugador decidió iniciar el juego, false en caso contrario.
+     * Maneja el renderizado y los clics del menú.
+     * @return 0 = Continuar en el menú, 1 = Iniciar Juego, 2 = Abrir Opciones.
      */
-    public boolean manejarMenu(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuenteMenu, Texture fondoMap) {
+    public int manejarMenu(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuenteMenu, Texture fondoMap) {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
         
-        // Sincronizamos la cámara
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         
-        // Dibuja el mapa de fondo estático
         if (fondoMap != null) {
             batch.draw(fondoMap, 0, 0);
         }
 
         if (!enMenuPrincipal) {
-            // PANTALLA 1: "Press to Play"
             fuenteMenu.setColor(Color.RED);
-            fuenteMenu.getData().setScale(2.0f);
-            String textoTitulo = "AREA 67 - JAVA";
+            fuenteMenu.getData().setScale(2.5f);
+            String textoTitulo = "Area 67";
             layout.setText(fuenteMenu, textoTitulo);
             float xTitulo = (camera.viewportWidth - layout.width) / 2f;
-            fuenteMenu.draw(batch, textoTitulo, xTitulo, 380);
+            fuenteMenu.draw(batch, textoTitulo, xTitulo, 420);
 
             fuenteMenu.setColor(Color.WHITE);
-            fuenteMenu.getData().setScale(1.2f);
+            fuenteMenu.getData().setScale(1.1f);
             String textoPress = "PRESS ANY KEY OR CLICK TO START";
             layout.setText(fuenteMenu, textoPress);
             float xPress = (camera.viewportWidth - layout.width) / 2f;
             fuenteMenu.draw(batch, textoPress, xPress, 300);
 
-            // Detectar clic o tecla para pasar al menú de botones
             if (Gdx.input.isTouched() || Gdx.input.isKeyJustPressed(Input.Keys.ANY_KEY)) {
                 enMenuPrincipal = true;
             }
         } else {
-            // PANTALLA 2: Botones PLAY y CONFIGURACIÓN
-            fuenteMenu.setColor(Color.YELLOW);
-            fuenteMenu.getData().setScale(2.0f);
-            String textoMenu = "MENU PRINCIPAL";
+            batch.end();
+            
+            shapeRenderer.setProjectionMatrix(camera.combined);
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            
+            shapeRenderer.setColor(0.1f, 0.75f, 0.2f, 0.9f);
+            shapeRenderer.rect(rectPlay.x, rectPlay.y, rectPlay.width, rectPlay.height);
+            shapeRenderer.rect(rectConfig.x, rectConfig.y, rectConfig.width, rectConfig.height);
+            shapeRenderer.rect(rectSalir.x, rectSalir.y, rectSalir.width, rectSalir.height);
+            
+            shapeRenderer.end();
+            batch.begin();
+
+            fuenteMenu.setColor(Color.RED);
+            fuenteMenu.getData().setScale(2.2f);
+            String textoMenu = "Area 67";
             layout.setText(fuenteMenu, textoMenu);
             float xMenu = (camera.viewportWidth - layout.width) / 2f;
-            fuenteMenu.draw(batch, textoMenu, xMenu, 420);
+            fuenteMenu.draw(batch, textoMenu, xMenu, 460);
 
-            fuenteMenu.getData().setScale(1.5f);
-            fuenteMenu.setColor(Color.WHITE);
+            fuenteMenu.getData().setScale(1.3f);
+            fuenteMenu.setColor(Color.RED);
 
-            String textoPlay = "> PLAY <";
+            String textoPlay = "Juego";
             layout.setText(fuenteMenu, textoPlay);
-            float xPlay = (camera.viewportWidth - layout.width) / 2f;
-            fuenteMenu.draw(batch, textoPlay, xPlay, 320);
+            fuenteMenu.draw(batch, textoPlay, rectPlay.x + (rectPlay.width - layout.width) / 2f, rectPlay.y + 32f);
 
-            String textoConfig = "> CONFIGURACION <";
+            String textoConfig = "Opciones";
             layout.setText(fuenteMenu, textoConfig);
-            float xConfig = (camera.viewportWidth - layout.width) / 2f;
-            fuenteMenu.draw(batch, textoConfig, xConfig, 240);
+            fuenteMenu.draw(batch, textoConfig, rectConfig.x + (rectConfig.width - layout.width) / 2f, rectConfig.y + 32f);
+
+            String textoSalir = "Salir";
+            layout.setText(fuenteMenu, textoSalir);
+            fuenteMenu.draw(batch, textoSalir, rectSalir.x + (rectSalir.width - layout.width) / 2f, rectSalir.y + 32f);
 
             // 1. Control por Teclado
             if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                 batch.end();
-                return true; // ¡Arranca el juego!
+                return 1; // Iniciar Juego
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
-                System.out.println("Configuración abierta");
+                batch.end();
+                return 2; // Abrir Opciones
             }
 
-            // 2. Control por Clic del Mouse mapeado con la cámara
+            // 2. Control por Clic del Mouse
             if (Gdx.input.justTouched()) {
                 Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                 camera.unproject(touchPos);
@@ -94,21 +117,25 @@ public class MenuPrincipal {
                 float mouseX = touchPos.x;
                 float mouseY = touchPos.y;
 
-                if (mouseX >= 200 && mouseX <= 600) {
-                    // Botón PLAY (Y: 280 a 330)
-                    if (mouseY >= 280 && mouseY <= 330) {
-                        batch.end();
-                        return true; // ¡Arranca el juego!
-                    }
-                    // Botón CONFIGURACIÓN (Y: 200 a 250)
-                    else if (mouseY >= 200 && mouseY <= 250) {
-                        System.out.println("Configuración abierta");
-                    }
+                if (rectPlay.contains(mouseX, mouseY)) {
+                    batch.end();
+                    return 1; // Iniciar Juego
+                } else if (rectConfig.contains(mouseX, mouseY)) {
+                    batch.end();
+                    return 2; // Abrir Opciones
+                } else if (rectSalir.contains(mouseX, mouseY)) {
+                    Gdx.app.exit();
                 }
             }
         }
 
         batch.end();
-        return false; // El juego sigue en el menú principal
+        return 0; // Seguir en el menú principal
+    }
+
+    public void dispose() {
+        if (shapeRenderer != null) {
+            shapeRenderer.dispose();
+        }
     }
 }
