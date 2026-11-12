@@ -6,6 +6,10 @@
 
 -Se le agrego las texturas al jefe
 
+-Se agrego el MenuOpciones que se encarga por ahora de reducir y subir el volumen del juego
+
+-Se Mejoro el MenuPrincipal con una nueva estetica
+
 -Se cambio la logica a la hora de volver a elegir un arma o que te toque en un cofre,ahora tienen mejoras progresivas si ya tenes esa arma.
 
 ## [11-11-2026]
