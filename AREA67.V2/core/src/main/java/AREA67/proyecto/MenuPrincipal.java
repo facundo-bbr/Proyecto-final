@@ -88,7 +88,7 @@ public class MenuPrincipal {
             fuenteMenu.getData().setScale(1.3f);
             fuenteMenu.setColor(Color.RED);
 
-            String textoPlay = "Juego";
+            String textoPlay = "Juegar";
             layout.setText(fuenteMenu, textoPlay);
             fuenteMenu.draw(batch, textoPlay, rectPlay.x + (rectPlay.width - layout.width) / 2f, rectPlay.y + 32f);
 
