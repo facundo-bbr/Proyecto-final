@@ -18,10 +18,10 @@ import com.badlogic.gdx.Input;
 
 public class Principal extends ApplicationAdapter {
     
-	private boolean juegoIniciado = false;
+    private boolean juegoIniciado = false;
     private BitmapFont fuenteMenu;
-	
-	private SpriteBatch batch;
+    
+    private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private Texture image;
     public AssetManager manager;
@@ -49,11 +49,10 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaEscudovich;
     private Texture texturaCorazon;
 
-
     // Entidad Jugador
     private Personaje jugador;
     
-    //Menus
+    // Menús
     private MenuMejora menuMejora;
     private MenuDerrota menuDerrota;
     private MenuPrincipal menuPrincipal;
@@ -73,18 +72,19 @@ public class Principal extends ApplicationAdapter {
     private TextureRegion[] framesZombieRojo;
     private TextureRegion[] framesEsqueleto;
     private float temporizadorSpawneo;
+    private float temporizadorObstaculo = 0f;
     
     private Texture texturaObstaculo;
 
-    private boolean yaMurio = false;
-    
-
-    
     @Override
     public void create() {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
+        
+        // 1. Cargar la textura y configurar el wrap mode para repetición infinita
         image = new Texture("mapa.jpg");
+        image.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
+
         manager = new AssetManager();
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600);
@@ -96,30 +96,30 @@ public class Principal extends ApplicationAdapter {
 
         texturaGemaVerde = new Texture("xpverde.png");
         texturaBala = new Texture("bala.png");
-        texturaCuchillo=new Texture ("Cuchillo.png");
-        texturaPincho=new Texture ("Pincho.png");
-        texturaPollo=new Texture ("Pollo.png");
-        texturaObstaculo= new Texture ("Barril.png");
-        texturaIman = new Texture ("Iman.png");
-        texturaCofre= new Texture ("Cofre.png");
-        texturaQueso= new Texture ("Queso.png");
-        texturaGemaRoja=new Texture ("xprojo.png");
-        texturaBolafuego= new Texture ("Bolafuego.png");
-        texturaCorazonCeda= new Texture ("CorazonCeda.png");
-        texturaEscudovich = new Texture ("Escudovich.png");
-        texturaRecatate= new Texture ("Recatate.png");
-        texturaColgala = new Texture ("Colgala.png");
-        texturaCorazon = new Texture ("Corazon.png");
-        texturaGemaAzul = new Texture ("xpazul.png");
-        texturaImancito= new Texture ("tilin.png");
+        texturaCuchillo = new Texture("Cuchillo.png");
+        texturaPincho = new Texture("Pincho.png");
+        texturaPollo = new Texture("Pollo.png");
+        texturaObstaculo = new Texture("Barril.png");
+        texturaIman = new Texture("Iman.png");
+        texturaCofre = new Texture("Cofre.png");
+        texturaQueso = new Texture("Queso.png");
+        texturaGemaRoja = new Texture("xprojo.png");
+        texturaBolafuego = new Texture("Bolafuego.png");
+        texturaCorazonCeda = new Texture("CorazonCeda.png");
+        texturaEscudovich = new Texture("Escudovich.png");
+        texturaRecatate = new Texture("Recatate.png");
+        texturaColgala = new Texture("Colgala.png");
+        texturaCorazon = new Texture("Corazon.png");
+        texturaGemaAzul = new Texture("xpazul.png");
+        texturaImancito = new Texture("tilin.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
 
         // Carga de Sprites del Zombi
-        sheetZombieVerde = new Texture ("zombieverdeizq.png");
-        sheetZombieRojo = new Texture ("zombie der.png");
-        sheetEsqueleto = new Texture ("Esqueleto_der.png");
+        sheetZombieVerde = new Texture("zombieverdeizq.png");
+        sheetZombieRojo = new Texture("zombie der.png");
+        sheetEsqueleto = new Texture("Esqueleto_der.png");
 
         framesZombieVerde = cortarSprite(sheetZombieVerde, 60, 60);
         framesZombieRojo = cortarSprite(sheetZombieRojo, 60, 60);
@@ -130,24 +130,16 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo,texturaPincho,texturaBolafuego,texturaColgala,texturaRecatate,texturaEscudovich,texturaCorazonCeda,texturaCorazon,texturaImancito);
-        
+        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito);
         menuDerrota = new MenuDerrota();
-        
         menuPrincipal = new MenuPrincipal();
-        
         menuPausa = new MenuPausa();
         
-        float anchoMapa = image.getWidth();
-        float altoMapa = image.getHeight();
-        
-        int cantidadObstaculos=7;
-        
+        // Generar obstáculos iniciales distribuidos libremente alrededor del centro
+        int cantidadObstaculos = 15;
         for (int i = 0; i < cantidadObstaculos; i++) {
-            float posX = com.badlogic.gdx.math.MathUtils.random(50, anchoMapa - 100);
-            float posY = com.badlogic.gdx.math.MathUtils.random(50, altoMapa - 100);
-            
-            // Crear el obstáculo con vida inicial (ej: 50) y añadirlo a la lista
+            float posX = com.badlogic.gdx.math.MathUtils.random(-800, 800);
+            float posY = com.badlogic.gdx.math.MathUtils.random(-800, 800);
             listaObstaculos.add(new Obstaculos(posX, posY, texturaObstaculo, 250));
         }
     }
@@ -156,7 +148,7 @@ public class Principal extends ApplicationAdapter {
     public void render() {
         float deltaTime = Gdx.graphics.getDeltaTime();
         Texture texturaAElegir = texturaGemaVerde;
-        int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image); // <--- Le pasamos 'image'
+        int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image); 
         if (menuDerrota.isActivo()) {
             if (accionMenu == 1) {
                 reiniciarJuego();
@@ -168,82 +160,93 @@ public class Principal extends ApplicationAdapter {
         }
        
         if (!juegoIniciado) {
-            // Le pasamos los objetos necesarios y evaluamos si retorna true (pulsó Play)
             juegoIniciado = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
-            return; // Detiene el bucle para que no corra la lógica del juego por detrás
+            return; 
         }
         
-	        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && juegoIniciado && !jugador.estaMuerto() && !menuMejora.isActivo()) {
-	            if (menuPausa.isActivo()) {
-	                menuPausa.desactivar();
-	            } else {
-	                menuPausa.activar(camera);
-	            }
-	        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && juegoIniciado && !jugador.estaMuerto() && !menuMejora.isActivo()) {
+            if (menuPausa.isActivo()) {
+                menuPausa.desactivar();
+            } else {
+                menuPausa.activar(camera);
+            }
+        }
         
-	        if (menuPausa.isActivo()) {
-	            int accionPausa = menuPausa.manejarInputYRender(batch, camera, fuenteMenu, image);
-	            if (accionPausa == 1) {
-	                // Continuar juego (se cierra solo)
-	            } else if (accionPausa == 2) {
-	                reiniciarJuego();
-	                juegoIniciado = false; // Vuelve al menú principal
-	                menuPausa.desactivar();
-	            } else if (accionPausa == 3) {
-	                Gdx.app.exit(); // Cierra el programa
-	            }
-	            return; 
-	        }
-
+        if (menuPausa.isActivo()) {
+            int accionPausa = menuPausa.manejarInputYRender(batch, camera, fuenteMenu, image);
+            if (accionPausa == 1) {
+                // Continuar juego
+            } else if (accionPausa == 2) {
+                reiniciarJuego();
+                juegoIniciado = false;
+                menuPausa.desactivar();
+            } else if (accionPausa == 3) {
+                Gdx.app.exit();
+            }
+            return; 
+        }
 
         if (jugador.estaMuerto()) {
-        	if (!menuDerrota.isActivo()) {
+            if (!menuDerrota.isActivo()) {
                 System.out.println("¡Game Over!");
                 menuDerrota.activar(camera);
             }
             return;
         }
 
-        float centroPjX = jugador.getCentroX()+(jugador.getAncho() / 2f);
-        float centroPjY = jugador.getCentroY()+(jugador.getAlto() / 2f);
-     // 1. COMPROBAR SI HAY NIVELES PENDIENTES PARA ABRIR EL MENÚ
+        float centroPjX = jugador.getCentroX();
+        float centroPjY = jugador.getCentroY();
+
         if (jugador.getGestorExperiencia().tieneNivelesPendientes() && !menuMejora.isActivo()) {
             menuMejora.abrir();
         }
 
-         centroPjX = jugador.getCentroX();
-         centroPjY = jugador.getCentroY();
-
-        // 2. CONTROLAR EL FLUJO: Menú Activo vs Lógica del Juego
+        // Control del Flujo: Menú de Mejora Activo vs Lógica del Juego
         if (menuMejora.isActivo()) {
-            // El menú está abierto: congelamos TODO el juego y solo manejamos el menú
-            //menuMejora.manejarEntrada(jugador,camera);
+            // Congelado mientras elige mejora
         } else {
-            // --- TODO ESTE BLOQUE SE CONGELA CUANDO EL MENÚ ESTÁ ABIERTO ---
             tiempoJuego += deltaTime; 
 
-            // Actualizar movimiento, armas y cooldowns del jugador
+            // Actualizar movimiento, armas y cooldowns del jugador (movimiento libre)
             jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles);
 
-
-         // Spawneo de enemigos
+            // Spawneo de enemigos en un radio dinámico alrededor de la cámara/jugador
             temporizadorSpawneo += deltaTime;
             if (temporizadorSpawneo > 1.5f) {
-                // Elegimos un tipo de enemigo al azar (0, 1 o 2)
                 int tipoEnemigo = com.badlogic.gdx.math.MathUtils.random(0, 2);
+                
+                float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
+                float distanciaSpawn = 600f; 
+                float spawnX = centroPjX + MathUtils.cos(anguloRandom) * distanciaSpawn;
+                float spawnY = centroPjY + MathUtils.sin(anguloRandom) * distanciaSpawn;
 
                 if (tipoEnemigo == 0) {
-                    listaEnemigos.add(new ZombieVerde(framesZombieVerde, centroPjX, centroPjY));
+                    listaEnemigos.add(new ZombieVerde(framesZombieVerde, spawnX, spawnY));
                 } else if (tipoEnemigo == 1) {
-                    listaEnemigos.add(new ZombieRojo(framesZombieRojo, centroPjX, centroPjY));
+                    listaEnemigos.add(new ZombieRojo(framesZombieRojo, spawnX, spawnY));
                 } else {
-                    listaEnemigos.add(new Esqueleto(framesEsqueleto, centroPjX, centroPjY));
+                    listaEnemigos.add(new Esqueleto(framesEsqueleto, spawnX, spawnY));
                 }
 
                 temporizadorSpawneo = 0f;
             }
+         // --- NUEVO: Spawneo de barriles/obstáculos cada 30 segundos cerca del jugador ---
+            temporizadorObstaculo += deltaTime;
+            if (temporizadorObstaculo >= 30.0f) {
+                // Generar en un radio cercano (por ejemplo, entre 200 y 400 píxeles de distancia del jugador)
+                float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
+                float distanciaCercana = com.badlogic.gdx.math.MathUtils.random(200f, 400f);
+                
+                float obstaculoX = centroPjX + MathUtils.cos(anguloRandom) * distanciaCercana;
+                float obstaculoY = centroPjY + MathUtils.sin(anguloRandom) * distanciaCercana;
 
-         // Colisiones: Proyectiles vs Enemigos y Obstáculos
+                // Añadir a la lista con su vida inicial (ej: 250)
+                listaObstaculos.add(new Obstaculos(obstaculoX, obstaculoY, texturaObstaculo, 250));
+
+                temporizadorObstaculo = 0f; // Reiniciar el temporizador a 0
+            }
+
+            // Colisiones: Proyectiles vs Enemigos y Obstáculos
             for (int i = listaProyectiles.size - 1; i >= 0; i--) {
                 Proyectil p = listaProyectiles.get(i);
                 p.actualizar(deltaTime, listaEnemigos);
@@ -262,16 +265,14 @@ public class Principal extends ApplicationAdapter {
                         enemigo.recibirDano(p.getDano());
                         impacto = true;
                         
-                        // Si ES un ProyectilLlamarada, NO lo destruimos al golpear enemigos (atraviesa)
                         if (!(p instanceof ProyectilLlamarada)) {
                             p.destruir();
-                            break; // Rompemos el bucle de enemigos porque la bala normal murió
+                            break; 
                         }
-                        // Las llamaradas continúan y pueden golpear a varios enemigos a la vez
                     }
                 }
 
-                // 2. Colisión contra Obstáculos (Solo si el proyectil sigue activo)
+                // 2. Colisión contra Obstáculos
                 if (p.isActivo()) {
                     for (int k = listaObstaculos.size - 1; k >= 0; k--) {
                         Obstaculos obstaculo = listaObstaculos.get(k);
@@ -280,66 +281,53 @@ public class Principal extends ApplicationAdapter {
                             obstaculo.recibirDano(p.getDano());
                             impacto = true;
                             
-                            // Opcional: ¿Quieres que el lanzallamas atraviese los obstáculos o choque con ellos?
-                            // Si quieres que el lanzallamas tampoco muera con los obstáculos, envuélvelo igual:
                             if (!(p instanceof ProyectilLlamarada)) {
-                                p.destruir(); // El proyectil normal desaparece al impactar
+                                p.destruir();
                             }
 
                             if (obstaculo.estaDestruido()) {
-                                // Suelta el objeto al suelo
-                                ObjetoSuelo loot = obstaculo.soltarObjeto(); // Ajustado a tu método de la clase Obstaculos
+                                ObjetoSuelo loot = obstaculo.soltarObjeto();
                                 if (loot != null) {
                                     listaObjetosSuelo.add(loot);
                                 }
-                                listaObstaculos.removeIndex(k); // Elimina el obstáculo roto
+                                listaObstaculos.removeIndex(k);
                             }
                             break;
                         }
                     }
                 }
-                // Si el proyectil impactó contra algo o se desactivó, lo eliminamos de la lista
+                
                 if ((impacto && !(p instanceof ProyectilLlamarada)) || !p.isActivo()) {
                     listaProyectiles.removeIndex(i);
                 }
             }
             
-           
-            
-         // Colisiones: Persecución y Ataque del Enemigo al Jugador
-            float objetivoX = centroPjX; // O ajusta si usas el centro exacto
-            float objetivoY = centroPjY;
-
+            // Colisiones: Persecución y Ataque del Enemigo al Jugador
             for (int i = listaEnemigos.size - 1; i >= 0; i--) {
                 enemigos enemigo = listaEnemigos.get(i);
                 enemigo.actualizar(deltaTime);
-                enemigo.perseguir(objetivoX, objetivoY, deltaTime,listaEnemigos); // Se mueven solo aquí
+                enemigo.perseguir(centroPjX, centroPjY, deltaTime, listaEnemigos); 
 
                 if (enemigo.estaMuerto()) {
-                    // Obtenemos el rectángulo de colisión o centro del enemigo actual de forma segura
                     float centroEnemigoX = enemigo.getX() + (enemigo.getBounds().width / 2f);
                     float centroEnemigoY = enemigo.getY() + (enemigo.getBounds().height / 2f);
                     
                     float gemaX = centroEnemigoX - (texturaGemaVerde.getWidth() / 2f);
                     float gemaY = centroEnemigoY - (texturaGemaVerde.getHeight() / 2f);
 
-                    // --- DECIDIR QUÉ SUELTA EL ENEMIGO AL MORIR ---
                     String varianteGema = "VERDE";
                     int valorExperiencia = 10;
                     
-                    if (Math.random() < 0.20) { // 20% de probabilidad
+                    if (Math.random() < 0.20) {
                         varianteGema = "ROJA";
-                        valorExperiencia = 35;  // Da más experiencia
+                        valorExperiencia = 35;  
                     }
 
-                    // Creamos el objeto con su tipo, valor y variante específica
                     listaObjetosSuelo.add(new ObjetoSuelo(gemaX, gemaY, "GEMA_EXPERIENCIA", valorExperiencia, varianteGema));
-                    
                     listaEnemigos.removeIndex(i);
                     continue;
                 }
 
-                // Comprobar daño al jugador usando las dimensiones del enemigo actual
                 float centroEnemigoX = enemigo.getX() + (enemigo.getBounds().width / 2f);
                 float centroEnemigoY = enemigo.getY() + (enemigo.getBounds().height / 2f);
                 
@@ -350,11 +338,8 @@ public class Principal extends ApplicationAdapter {
             
             for (int k = listaObstaculos.size - 1; k >= 0; k--) {
                 Obstaculos obstaculo = listaObstaculos.get(k);
-                
-                // 1. Actualizar el temporizador de inmunidad del barril
                 obstaculo.actualizar(deltaTime);
 
-                // 2. Comprobar colisión con la Bola de Pinchos
                 for (Arma arma : jugador.arsenal) {
                     if (arma != null && arma instanceof BolaPinchos) {
                         BolaPinchos bola = (BolaPinchos) arma;
@@ -368,37 +353,43 @@ public class Principal extends ApplicationAdapter {
                                     listaObjetosSuelo.add(loot);
                                 }
                                 listaObstaculos.removeIndex(k);
-                                break; // Salimos del bucle de armas para este obstáculo ya destruido
+                                break;
                             }
                         }
                     }
                 }
-            }        } // <--- FIN DEL BLOQUE ELSE (Aquí termina la congelación)
-        
-       
+            }         
+        } 
 
-        // 3. CÁMARA Y LÍMITES DEL MAPA
-        float pjXClamped = MathUtils.clamp(jugador.getX(), 0, image.getWidth() - jugador.getAncho());
-        float pjYClamped = MathUtils.clamp(jugador.getY(), 0, image.getHeight() - jugador.getAlto());
-        jugador.setX(pjXClamped);
-        jugador.setY(pjYClamped);
-
+        // =========================================================================
+        // CÁMARA E INFINITO (Sin límites ni clamp, siguiendo libremente al jugador)
+        // =========================================================================
         camera.position.x = jugador.getCentroX();
         camera.position.y = jugador.getCentroY();
-
-        float halfCamW = camera.viewportWidth / 2f;
-        float halfCamH = camera.viewportHeight / 2f;
-        camera.position.x = MathUtils.clamp(camera.position.x, halfCamW, image.getWidth() - halfCamW);
-        camera.position.y = MathUtils.clamp(camera.position.y, halfCamH, image.getHeight() - halfCamH);
         camera.update();
 
-     // 4. RENDERIZADO (SPRITE BATCH)
+        // =========================================================================
+        // 4. RENDERIZADO (SPRITE BATCH Y MAPA INFINITO EN BUCLE)
+        // =========================================================================
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        // A. Fondo del mapa
-        batch.draw(image, 0, 0);
+        // A. Fondo del mapa infinito en bucle (Tiling)
+        float anchoTextura = image.getWidth();
+        float altoTextura = image.getHeight();
+
+        float camIzq = camera.position.x - (camera.viewportWidth / 2f);
+        float camAbajo = camera.position.y - (camera.viewportHeight / 2f);
+
+        float inicioX = (float) Math.floor(camIzq / anchoTextura) * anchoTextura;
+        float inicioY = (float) Math.floor(camAbajo / altoTextura) * altoTextura;
+
+        for (float x = inicioX; x < camIzq + camera.viewportWidth + anchoTextura; x += anchoTextura) {
+            for (float y = inicioY; y < camAbajo + camera.viewportHeight + altoTextura; y += altoTextura) {
+                batch.draw(image, x, y);
+            }
+        }
 
         // B. Obstáculos del mapa
         for (Obstaculos obstaculo : listaObstaculos) {
@@ -409,10 +400,8 @@ public class Principal extends ApplicationAdapter {
         for (int i = listaObjetosSuelo.size - 1; i >= 0; i--) {
             ObjetoSuelo objeto = listaObjetosSuelo.get(i);
 
-            // 1. Mover hacia el jugador si está dentro del rango del imán
             jugador.getRecolector().actualizarObjeto(objeto, deltaTime, centroPjX, centroPjY);
 
-            // 2. Comprobar si el jugador lo toca para recogerlo
             float distanciaJugador = Vector2.dst(centroPjX, centroPjY, objeto.getX(), objeto.getY());
             if (distanciaJugador <= 25f && !objeto.estaRecogido()) {
                 jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(), texturaCuchillo, texturaPincho, jugador, texturaBolafuego);
@@ -429,7 +418,7 @@ public class Principal extends ApplicationAdapter {
                     }
                     break;
                     
-                case "CURACION":   
+                case "CURACION":    
                     if (objeto.getVariante().equals("QUESO")) {
                         texturaAElegir = texturaQueso; 
                     } else {
@@ -437,11 +426,11 @@ public class Principal extends ApplicationAdapter {
                     }
                     break;
                     
-                case "IMAN": 			 
+                case "IMAN":            
                     texturaAElegir = texturaIman; 
                     break;
                     
-                case "COFRE_TESORO":			 
+                case "COFRE_TESORO":            
                     texturaAElegir = texturaCofre; 
                     break;
             }
@@ -469,9 +458,6 @@ public class Principal extends ApplicationAdapter {
         // F. HUD de texto del juego
         dibujarUIHUD();
         
-        // ¡IMPORTANTE! Quitamos el menuMejora.dibujar de aquí adentro para que no rompa el batch principal.
-
-        // Cerramos el batch principal de forma limpia
         batch.end();
 
         // 5. RENDERIZADO (SHAPE RENDERER - BARRAS SOBRE EL JUGADOR)
@@ -480,15 +466,12 @@ public class Principal extends ApplicationAdapter {
         jugador.dibujarUI(shapeRenderer);
         shapeRenderer.end();
 
-        // =========================================================================
-        // 6. MENÚ DE MEJORA (Se dibuja al final de todo y gestiona su propio batch/shapes)
-        // =========================================================================
+        // 6. MENÚ DE MEJORA
         if (menuMejora.isActivo()) {
             menuMejora.manejarInputYRender(batch, camera, fuenteMenu, image, jugador);
             return;
         }
     }
-    
 
     private void dibujarUIHUD() {
         int minutos = (int) (tiempoJuego / 60);
@@ -548,21 +531,15 @@ public class Principal extends ApplicationAdapter {
     public void resume() {
         super.resume();
 
-        // 1. Recargar la textura del fondo principal (o mapa) si es la que se pone negra
         if (image != null) {
-            image.dispose(); // Limpiamos la referencia anterior por seguridad
+            image.dispose(); 
         }
-        image = new Texture("mapa.jpg"); // Reemplaza con la ruta real de tu imagen de fondo
+        image = new Texture("mapa.jpg"); 
+        image.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
         
         if (menuDerrota != null) {
             menuDerrota.recargarRecursos();
         }
-        // 2. Si tienes otras texturas globales críticas en Principal.java, recárgalas aquí también.
-        // Por ejemplo, si el jugador o los enemigos cargan texturas estáticas globales, haz lo mismo:
-        // if (texturaJugador != null) {
-        //     texturaJugador.dispose();
-        //     texturaJugador = new Texture("jugador.png");
-        // }
     }
     
     private TextureRegion[] cortarSprite(Texture sheet, int tileWidth, int tileHeight) {
@@ -576,27 +553,21 @@ public class Principal extends ApplicationAdapter {
     }
     
     private void reiniciarJuego() {
-        // 1. Volver al estado de menú principal y apagar el menú de derrota
         juegoIniciado = false; 
         if (menuDerrota != null) {
             menuDerrota.desactivar();
         }
 
-        // 2. Recentrar la cámara en el origen del mapa
         camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
         camera.update();
 
-        // 3. REINICIAR AL JUGADOR CREANDO UNA NUEVA INSTANCIA
-        // (Ajusta los parámetros según lo que requiera el constructor de tu clase Jugador)
         float centroX = camera.viewportWidth / 2f;
         float centroY = camera.viewportHeight / 2f;
-        jugador = new Personaje(centroX, centroY,texturaBala); // Esto resetea vida, armas y estadísticas automáticamente
+        jugador = new Personaje(centroX, centroY, texturaBala); 
 
-        // 4. REINICIAR EL TIEMPO
         tiempoJuego = 0f; 
         temporizadorSpawneo = 0f;
 
-        // 5. LIMPIAR LAS LISTAS DE ENTIDADES (Enemigos, objetos en suelo, etc.)
         if (listaEnemigos != null) {
             listaEnemigos.clear();
         }
@@ -605,7 +576,6 @@ public class Principal extends ApplicationAdapter {
             listaObjetosSuelo.clear();
         }
 
-        // ¡AQUÍ ESTÁ LA LIMPIEZA DE PROYECTILES!
         if (listaProyectiles != null) {
             listaProyectiles.clear();
         }

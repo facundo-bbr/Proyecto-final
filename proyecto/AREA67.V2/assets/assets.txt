@@ -1,0 +1,21 @@
+Barril.png
+Cofre.png
+Iman.png
+Pincho.png
+Pollo.png
+Queso.png
+bala.png
+cuchillo.png
+donpollo_derecha.png
+donpollo_izquierda.png
+logo.png
+mapa.jpg
+mapaanimado.gif
+soldado.png
+tilin.png
+xprojo.png
+xpverde.png
+zombie der.png
+zombie izq.png
+zombieverdeder.png
+zombieverdeizq.png

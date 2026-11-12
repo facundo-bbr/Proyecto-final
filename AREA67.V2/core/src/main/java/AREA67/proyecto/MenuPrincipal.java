@@ -16,7 +16,7 @@ public class MenuPrincipal {
     private GlyphLayout layout;
 
     public MenuPrincipal() {
-        this.enMenuPrincipal = false;
+         this.enMenuPrincipal = false;
         this.layout = new GlyphLayout();
     }
 
