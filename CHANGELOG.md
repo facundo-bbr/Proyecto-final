@@ -1,3 +1,13 @@
+## [12-11-2026]
+
+-cambio
+
+-Se agrego la clase jefe que se encarga de spawnear al jefe
+
+-Se le agrego las texturas al jefe
+
+-Se cambio la logica a la hora de volver a elegir un arma o que te toque en un cofre,ahora tienen mejoras progresivas si ya tenes esa arma.
+
 ## [11-11-2026]
 -cambio
 
@@ -12,6 +22,10 @@
 -Se mejoro el MenuMejora ahora siendo ahora clickeable y mas vistoso
 
 -Se agrego un nuevo token de xp:El azul que sera el peor entre las que ya habia
+
+-Se expandio el mapa que ya teniamos
+
+-Se agrego nuevas texturas a los barriles
 
 ## [9-11-2026]
 -cambio
