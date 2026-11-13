@@ -29,7 +29,7 @@ public class Principal extends ApplicationAdapter {
     private OrthographicCamera camera;
 
     private float tiempoJuego;
-    private float intervaloJefe = 120f;        // 120 segundos = 2 minutos
+    private float intervaloJefe = 30f;        // 120 segundos = 2 minutos
     private float tiempoUltimoJefe = 0f;       // Controla cuándo apareció el último jefe
     private BitmapFont fuenteSurvival;
     private BitmapFont fuenteTexto;
@@ -313,6 +313,22 @@ public class Principal extends ApplicationAdapter {
                         }
                     }
                 }
+                if (p.isActivo() && listaJefes != null) {
+                    for (int j = listaJefes.size - 1; j >= 0; j--) {
+                        Jefe jefe = listaJefes.get(j);
+                        if (jefe != null && p.getBounds().overlaps(jefe.getBounds())) {
+                            if (!(p instanceof ProyectilMolotov)) {
+                                jefe.recibirDano(p.getDano());
+                            }
+                            impacto = true;
+                            
+                            if (!(p instanceof ProyectilLlamarada) && !(p instanceof ProyectilMolotov)) {
+                                p.destruir();
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 // 2. Colisión contra Obstáculos
                 if (p.isActivo()) {
@@ -412,10 +428,38 @@ public class Principal extends ApplicationAdapter {
                 }
             }
             if (listaJefes != null) {
-                for (int i = 0; i < listaJefes.size; i++) {
+                for (int i = listaJefes.size - 1; i >= 0; i--) {
                     Jefe jefe = listaJefes.get(i);
-                    if (jefe != null) {
-                        jefe.actualizar(deltaTime, centroPjX, centroPjY, jugador);
+                    if (jefe == null) continue;
+
+                    jefe.actualizar(deltaTime, centroPjX, centroPjY, jugador);
+
+                    // A. Verificar si el Jefe murió
+                    if (jefe.estaMuerto()) {
+                        float centroJefeX = jefe.getX() + (jefe.getBounds().width / 2f);
+                        float centroJefeY = jefe.getY() + (jefe.getBounds().height / 2f);
+
+                        // Soltar recompensa (ej. un Cofre o una Gema Roja de mucha XP)
+                        float lootX = centroJefeX - (texturaCofre.getWidth() / 2f);
+                        float lootY = centroJefeY - (texturaCofre.getHeight() / 2f);
+                        
+                        // Opción 1: Suelta una gema roja con 200 de XP
+                        listaObjetosSuelo.add(new ObjetoSuelo(lootX, lootY, "GEMA_EXPERIENCIA", 200, "ROJA"));
+                        
+                        // Opción 2 (Si quieres que suelte un cofre, descomenta la línea de abajo):
+                        // listaObjetosSuelo.add(new ObjetoSuelo(lootX, lootY, "COFRE_TESORO", 0, ""));
+
+                        listaJefes.removeIndex(i);
+                        continue;
+                    }
+
+                    // B. Daño por contacto cuerpo a cuerpo al jugador
+                    float centroJefeX = jefe.getX() + (jefe.getBounds().width / 2f);
+                    float centroJefeY = jefe.getY() + (jefe.getBounds().height / 2f);
+
+                    // Usamos un radio un poco mayor (ej. 60f) porque el sprite del jefe (96x96) es más grande que el de los zombies (60x60)
+                    if (Vector2.dst(centroPjX, centroPjY, centroJefeX, centroJefeY) < 60f) {
+                        jugador.recibirDano(20); // El jefe hace más daño que un enemigo normal
                     }
                 }
             }
