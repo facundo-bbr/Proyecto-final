@@ -60,7 +60,7 @@ public class Recolector {
     }
 
     // CAMBIADO A PUBLIC para poder llamarlo desde tu bucle principal al chocar con objetos
-    public void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud, Texture texturaCuchillo,Texture texturaPincho,Personaje jugador,Texture texturaBolafuego) {
+    public void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud, Texture texturaCuchillo,Texture texturaPincho,Personaje jugador,Texture texturaBolafuego,Texture texturaBotella) {
         if (objeto.estaRecogido()) return;
         
         objeto.marcarComoRecogido();
@@ -74,7 +74,7 @@ public class Recolector {
                 break;
             case "COFRE_TESORO":
                 Arma[] arsenal = jugador.getArsenal();
-                int tipoArmaRandom = (int) (Math.random() * 3); // 0, 1 o 2 (3 armas en total)
+                int tipoArmaRandom = (int) (Math.random() * 4); // 0, 1 o 2 (3 armas en total)
                 
                 // 1. Verificamos si el jugador ya posee esa arma específica para mejorarla
                 boolean armaEncontrada = false;
@@ -97,7 +97,7 @@ public class Recolector {
                             break;
                         }
                     }
-                } else {
+                } else if (tipoArmaRandom == 2) {
                     for (Arma arma : arsenal) {
                         if (arma instanceof ArmaLanzallamas) {
                             ((ArmaLanzallamas) arma).aplicarMejoraProgresiva();
@@ -106,6 +106,13 @@ public class Recolector {
                             break;
                         }
                     }
+                }else {
+                	for (Arma arma : arsenal) {
+                        if (arma instanceof Molotov) {
+                            ((Molotov) arma).aplicarMejoraProgresiva();
+                            System.out.println("¡Molotov mejorado desde el cofre!");
+                            armaEncontrada = true;
+                            break;
                 }
                 
                 // 2. Si no la tenía equipada, buscamos un espacio libre para dársela de cero
@@ -118,9 +125,14 @@ public class Recolector {
                             } else if (tipoArmaRandom == 1) {
                                 arsenal[i] = new BolaPinchos(texturaPincho);
                                 System.out.println("¡Bola de pinchos obtenida del cofre!");
-                            } else {
+                            } else if (tipoArmaRandom == 2) {
                                 arsenal[i] = new ArmaLanzallamas(texturaBolafuego);
                                 System.out.println("¡Lanzallamas obtenido del cofre!");
+                            }else {
+                            	 arsenal[i] = new Molotov(texturaBotella);
+                                 System.out.println("¡Molotov obtenido del cofre!");
+                            }
+                            	}
                             }
                             break;
                         }

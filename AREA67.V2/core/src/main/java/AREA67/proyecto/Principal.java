@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.Input;
 
+
 public class Principal extends ApplicationAdapter {
     
     private boolean juegoIniciado = false;
@@ -50,6 +51,7 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaColgala;
     private Texture texturaEscudovich;
     private Texture texturaCorazon;
+    private Texture texturaBotella;
 
     // Entidad Jugador
     private Personaje jugador;
@@ -125,6 +127,7 @@ public class Principal extends ApplicationAdapter {
         texturaImancito = new Texture("Imancito.png");
         sheetCaminarJefe = new Texture("jefearea67.png");
         sheetAtaqueJefe = sheetCaminarJefe;
+        texturaBotella = new Texture ("Botella.png");
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
@@ -149,7 +152,7 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito);
+        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito,texturaBotella);
         menuDerrota = new MenuDerrota();
         menuPrincipal = new MenuPrincipal();
         menuPausa = new MenuPausa();
@@ -166,9 +169,8 @@ public class Principal extends ApplicationAdapter {
 
     @Override
     public void render() {
-        float deltaTime = Gdx.graphics.getDeltaTime();
+    	float deltaTime = Gdx.graphics.getDeltaTime();
         Texture texturaAElegir = texturaGemaVerde;
-        int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image);
         boolean juegoPausado = menuMejora.isActivo() || menuPausa.isActivo() || menuDerrota.isActivo() || menuOpciones.isActivo() || !juegoIniciado;        if (menuOpciones.isActivo()) {
             boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
             if (salirOpciones) {
@@ -176,19 +178,17 @@ public class Principal extends ApplicationAdapter {
             }
             return;
         }
+        if (menuOpciones.isActivo()) {
+            menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
+            return;
+        }
         if (menuDerrota.isActivo()) {
+            int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image);
             if (accionMenu == 1) {
                 reiniciarJuego();
                 menuDerrota.desactivar();
             } else if (accionMenu == 2) {
                 Gdx.app.exit();
-            }
-            return;
-        }
-        if (menuOpciones.isActivo()) {
-            boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
-            if (salirOpciones) {
-                // Al volver de opciones, se desacriva solo
             }
             return;
         }
@@ -286,7 +286,7 @@ public class Principal extends ApplicationAdapter {
                 temporizadorObstaculo = 0f; // Reiniciar el temporizador a 0
             }
 
-            // Colisiones: Proyectiles vs Enemigos y Obstáculos
+         // Colisiones: Proyectiles vs Enemigos y Obstáculos
             for (int i = listaProyectiles.size - 1; i >= 0; i--) {
                 Proyectil p = listaProyectiles.get(i);
                 p.actualizar(deltaTime, listaEnemigos);
@@ -302,12 +302,14 @@ public class Principal extends ApplicationAdapter {
                 for (int j = listaEnemigos.size - 1; j >= 0; j--) {
                     enemigos enemigo = listaEnemigos.get(j);
                     if (p.getBounds().overlaps(enemigo.getBounds())) {
-                        enemigo.recibirDano(p.getDano());
+                        if (!(p instanceof ProyectilMolotov)) {
+                            enemigo.recibirDano(p.getDano());
+                        }
                         impacto = true;
                         
-                        if (!(p instanceof ProyectilLlamarada)) {
+                        if (!(p instanceof ProyectilLlamarada) && !(p instanceof ProyectilMolotov)) {
                             p.destruir();
-                            break; 
+                            break;
                         }
                     }
                 }
@@ -318,10 +320,12 @@ public class Principal extends ApplicationAdapter {
                         Obstaculos obstaculo = listaObstaculos.get(k);
                         
                         if (p.getBounds().overlaps(obstaculo.getBounds())) {
-                            obstaculo.recibirDano(p.getDano());
+                            if (!(p instanceof ProyectilMolotov)) {
+                                obstaculo.recibirDano(p.getDano());
+                            }
                             impacto = true;
                             
-                            if (!(p instanceof ProyectilLlamarada)) {
+                            if (!(p instanceof ProyectilLlamarada) && !(p instanceof ProyectilMolotov)) {
                                 p.destruir();
                             }
 
@@ -337,7 +341,7 @@ public class Principal extends ApplicationAdapter {
                     }
                 }
                 
-                if ((impacto && !(p instanceof ProyectilLlamarada)) || !p.isActivo()) {
+                if ((impacto && !(p instanceof ProyectilLlamarada) && !(p instanceof ProyectilMolotov)) || !p.isActivo()) {
                     listaProyectiles.removeIndex(i);
                 }
             }
@@ -462,7 +466,7 @@ public class Principal extends ApplicationAdapter {
 
             float distanciaJugador = Vector2.dst(centroPjX, centroPjY, objeto.getX(), objeto.getY());
             if (distanciaJugador <= 25f && !objeto.estaRecogido()) {
-                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(), texturaCuchillo, texturaPincho, jugador, texturaBolafuego);
+                jugador.getRecolector().recogerObjeto(objeto, jugador.getGestorExperiencia(), jugador.getGestorVida(), texturaCuchillo, texturaPincho, jugador, texturaBolafuego,texturaBotella);
                 listaObjetosSuelo.removeIndex(i);
                 continue;
             }
@@ -523,6 +527,7 @@ public class Principal extends ApplicationAdapter {
             }
         }
 
+
         // F. HUD de texto del juego
         dibujarUIHUD();
         
@@ -530,8 +535,18 @@ public class Principal extends ApplicationAdapter {
 
         // 5. RENDERIZADO (SHAPE RENDERER - BARRAS SOBRE EL JUGADOR)
         shapeRenderer.setProjectionMatrix(camera.combined);
+        Gdx.gl.glEnable(com.badlogic.gdx.graphics.GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(com.badlogic.gdx.graphics.GL20.GL_SRC_ALPHA, com.badlogic.gdx.graphics.GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        jugador.dibujarUI(shapeRenderer);
+        
+         for (Proyectil p : listaProyectiles) {
+            if (p instanceof ProyectilMolotov) {
+                ((ProyectilMolotov) p).dibujarFuegoVisual(shapeRenderer);
+            }
+        }
+         
+         jugador.dibujarUI(shapeRenderer);
+         
         if (listaJefes != null) {
             for (int i = 0; i < listaJefes.size; i++) {
                 Jefe jefe = listaJefes.get(i);
@@ -539,7 +554,9 @@ public class Principal extends ApplicationAdapter {
                     jefe.dibujarOndaExpansiva(shapeRenderer);
                 }
             }
-        }	
+        }
+        
+       
         shapeRenderer.end();
 
         // 6. MENÚ DE MEJORA
@@ -603,6 +620,10 @@ public class Principal extends ApplicationAdapter {
         }
         if (sheetCaminarJefe != null) sheetCaminarJefe.dispose();
         if (sheetAtaqueJefe != null && sheetAtaqueJefe != sheetCaminarJefe) sheetAtaqueJefe.dispose();
+        if (texturaBotella != null) {
+            texturaBotella.dispose();
+            texturaBotella = null;
+        }
     }
     
     @Override

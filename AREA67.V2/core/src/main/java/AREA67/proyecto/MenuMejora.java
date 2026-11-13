@@ -33,8 +33,9 @@ public class MenuMejora {
     private Texture texturaCorazonCeda;
     private Texture texturaCorazon;
     private Texture texturaImancito;
+    private Texture texturaBotella;
 
-    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,Texture texturaImancito) {
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,Texture texturaImancito,Texture texturaBotella) {
         this.texturaCuchillo = texturaCuchillo;
         this.texturaPincho = texturaPincho;
         this.texturaBolafuego = texturaBolafuego;
@@ -44,6 +45,7 @@ public class MenuMejora {
         this.texturaCorazonCeda = texturaCorazonCeda;
         this.texturaCorazon= texturaCorazon;
         this.texturaImancito= texturaImancito;
+        this.texturaBotella = texturaBotella;
         this.shapeRenderer = new ShapeRenderer();
         
         for (int i = 0; i < 3; i++) {
@@ -74,7 +76,8 @@ public class MenuMejora {
             "Bola de Pinchos",              // Tipo 5
             "Lanzallamas",                   // Tipo 6
             "Escudovich(Reducir Daño Recibido un 10%)",
-            "Corazon de Ceda (+20 HP max)"
+            "Corazon de Ceda (+20 HP max)",
+            "La peligroza"
         };
 
         com.badlogic.gdx.utils.Array<Integer> indicesDisponibles = new com.badlogic.gdx.utils.Array<>();
@@ -101,6 +104,7 @@ public class MenuMejora {
             case 7: return texturaEscudovich;
             case 8: return texturaCorazonCeda;
             default: return texturaImancito; 
+            case 9: return texturaBotella;
         }
     }
 
@@ -321,6 +325,30 @@ public class MenuMejora {
                     jugador.getGestorVida().aumentarVidaMaxima(20);
                 }
                 break;
+            case 9:
+            	Molotov molotovExistente = null;
+            	for (Arma arma : jugador.getArsenal()) { // Asegúrate de usar .getArsenal() o tu array según corresponda
+            	    if (arma instanceof Molotov) {
+            	        molotovExistente = (Molotov) arma;
+            	        break;
+            	    }
+            	}
+
+            	// 2. Si ya lo tiene, aplica la mejora progresiva (daño / cooldown)
+            	if (molotovExistente != null) {
+            	    molotovExistente.aplicarMejoraProgresiva();
+            	    System.out.println("¡Molotov mejorado de nivel!");
+            	} else {
+            	    // 3. Si no lo tiene, lo equipa en el primer espacio libre del arsenal
+            	    for (int i = 0; i < jugador.getArsenal().length; i++) {
+            	        if (jugador.getArsenal()[i] == null) {
+            	            jugador.getArsenal()[i] = new Molotov(texturaBotella); // texturas de la botella
+            	            System.out.println("¡Nuevo Molotov añadido al arsenal!");
+            	            break;
+            	        }
+            	    }
+            	}
+            	break;
         }
 
         jugador.getGestorExperiencia().consumirNivelPendiente();
