@@ -3,6 +3,8 @@ package AREA67.proyecto;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -52,10 +54,15 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaEscudovich;
     private Texture texturaCorazon;
     private Texture texturaBotella;
+    private Texture texturaLanzallamas;
 
     // Entidad Jugador
     private Personaje jugador;
     
+    //Musica y Sonidos
+    private Music musicaDeFondo;
+    private Sound sonidoSubidaDeNivel;
+    private Sound sonidoElegirOpcion;
     // Menús
     private MenuMejora menuMejora;
     private MenuDerrota menuDerrota;
@@ -118,6 +125,7 @@ public class Principal extends ApplicationAdapter {
         texturaQueso = new Texture("Queso.png");
         texturaGemaRoja = new Texture("xprojo.png");
         texturaBolafuego = new Texture("Bolafuego.png");
+        texturaLanzallamas = new Texture("Icono Lanzallamas.png");
         texturaCorazonCeda = new Texture("CorazonCeda.png");
         texturaEscudovich = new Texture("Escudovich.png");
         texturaRecatate = new Texture("Recatate.png");
@@ -131,6 +139,18 @@ public class Principal extends ApplicationAdapter {
 
         // Instancia del Personaje
         jugador = new Personaje(400, 300, texturaBala);
+        
+        //Musica y Sonido
+        musicaDeFondo = Gdx.audio.newMusic(Gdx.files.internal("Musica de fondo 1.mp3"));
+        musicaDeFondo.setLooping(true);
+        musicaDeFondo.setVolume(0.5f);
+        musicaDeFondo.play();
+
+        // Efectos de sonido
+        sonidoSubidaDeNivel = Gdx.audio.newSound(Gdx.files.internal("Sonido de subida de nivel.ogg"));
+        sonidoElegirOpcion = Gdx.audio.newSound(Gdx.files.internal("seleccionar opcion.ogg"));
+         
+        
 
         // Carga de Sprites del Zombi
         sheetZombieVerde = new Texture("zombieverdeizq.png");
@@ -152,7 +172,7 @@ public class Principal extends ApplicationAdapter {
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito,texturaBotella);
+        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito,texturaBotella, texturaLanzallamas);
         menuDerrota = new MenuDerrota();
         menuPrincipal = new MenuPrincipal();
         menuPausa = new MenuPausa();
@@ -668,6 +688,17 @@ public class Principal extends ApplicationAdapter {
             texturaBotella.dispose();
             texturaBotella = null;
         }
+        //musica y sonido
+        if (musicaDeFondo != null) {
+            musicaDeFondo.dispose();
+        }
+        if (sonidoSubidaDeNivel != null) {
+            sonidoSubidaDeNivel.dispose();
+        }
+        if (sonidoElegirOpcion != null) {
+            sonidoElegirOpcion.dispose();
+        }
+        
     }
     
     @Override

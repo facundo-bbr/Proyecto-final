@@ -34,8 +34,9 @@ public class MenuMejora {
     private Texture texturaCorazon;
     private Texture texturaImancito;
     private Texture texturaBotella;
+    private Texture texturaLanzallamas;
 
-    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,Texture texturaImancito,Texture texturaBotella) {
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,Texture texturaImancito,Texture texturaBotella, Texture texturaLanzallamas) {
         this.texturaCuchillo = texturaCuchillo;
         this.texturaPincho = texturaPincho;
         this.texturaBolafuego = texturaBolafuego;
@@ -46,6 +47,7 @@ public class MenuMejora {
         this.texturaCorazon= texturaCorazon;
         this.texturaImancito= texturaImancito;
         this.texturaBotella = texturaBotella;
+        this.texturaLanzallamas = texturaLanzallamas;
         this.shapeRenderer = new ShapeRenderer();
         
         for (int i = 0; i < 3; i++) {
@@ -100,7 +102,7 @@ public class MenuMejora {
         	case 2: return texturaColgala;
             case 4: return texturaCuchillo;
             case 5: return texturaPincho;
-            case 6: return texturaBolafuego;
+            case 6: return texturaLanzallamas;
             case 7: return texturaEscudovich;
             case 8: return texturaCorazonCeda;
             default: return texturaImancito; 
