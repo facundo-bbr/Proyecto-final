@@ -12,6 +12,10 @@
 
 -Se cambio la logica a la hora de volver a elegir un arma o que te toque en un cofre,ahora tienen mejoras progresivas si ya tenes esa arma.
 
+-Se agrego su clase y proyectil al arma Molotov y ProyectilMolotov.
+
+-Se les agrego sus texturas a la nueva arma
+
 ## [11-11-2026]
 -cambio
 
