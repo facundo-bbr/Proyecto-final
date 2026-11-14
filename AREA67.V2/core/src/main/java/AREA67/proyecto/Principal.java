@@ -33,7 +33,7 @@ public class Principal extends ApplicationAdapter {
     private OrthographicCamera camera;
 
     private float tiempoJuego;
-    private float intervaloJefe = 30f;        // 120 segundos = 2 minutos
+    private float intervaloJefe = 120f;        // 120 segundos = 2 minutos
     private float tiempoUltimoJefe = 0f;       // Controla cuándo apareció el último jefe
     private BitmapFont fuenteSurvival;
     private BitmapFont fuenteTexto;

@@ -11,8 +11,8 @@
 	public class Jefe {
 	    private float x, y;
 	    private float velocidad = 80f; // Un poco más lento pero imponente
-	    private int vida = 500;       // Mucha más vida que un enemigo normal
-	    private int dañoAtaque = 25;
+	    private int vida = 1500;       // Mucha más vida que un enemigo normal
+	    private int dañoAtaque = 30;
 	    protected float tiempoDesdeUltimoImpacto = 0f;
 	    protected static final float COOLDOWN_DANIO = 0.3f;
 	    
