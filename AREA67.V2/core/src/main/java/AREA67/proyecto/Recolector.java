@@ -21,7 +21,7 @@ public class Recolector {
 
     public float getRadioTotal() {
         if (imanActivo) {
-            return radio * 4f; // Calculado dinámicamente según el radio actual
+            return radio * 4f; 
         }
         return radio * multiplicador;
     }
@@ -40,10 +40,8 @@ public class Recolector {
     public void actualizarObjeto(ObjetoSuelo objeto, float deltaTime, float jugadorX, float jugadorY) {
         if (objeto.estaRecogido()) return;
 
-        // Distancia entre el objeto y el jugador
         float distancia = Vector2.dst(objeto.getX(), objeto.getY(), jugadorX, jugadorY);
         
-        // CORREGIDO: Usar getRadioTotal() para que tome en cuenta el imán o las mejoras
         if (distancia <= getRadioTotal()) {
             float dirX = jugadorX - objeto.getX();
             float dirY = jugadorY - objeto.getY();
@@ -57,7 +55,6 @@ public class Recolector {
         }
     }
 
-    // CAMBIADO A PUBLIC para poder llamarlo desde tu bucle principal al chocar con objetos
     public void recogerObjeto(ObjetoSuelo objeto, GestorExperiencia exp, GestorVida salud, Texture texturaCuchillo,Texture texturaPincho,Personaje jugador,Texture texturaBolafuego,Texture texturaBotella) {
         if (objeto.estaRecogido()) return;
         
@@ -72,9 +69,8 @@ public class Recolector {
                 break;
             case "COFRE_TESORO":
             	Arma[] arsenal = jugador.getArsenal();
-            	int tipoArmaRandom = (int) (Math.random() * 5); // 0, 1, 2 o 3 (4 armas en total)
+            	int tipoArmaRandom = (int) (Math.random() * 5); 
 
-            	// 1. Verificamos si el jugador ya posee esa arma específica para mejorarla
             	boolean armaEncontrada = false;
 
             	if (tipoArmaRandom == 0) {
@@ -122,7 +118,7 @@ public class Recolector {
             	            break;
             	        }
             	    }
-            	} else { // Caso 4: Rifle
+            	} else { 
             	    for (Arma arma : arsenal) {
             	        if (arma instanceof Fusil) {
             	            ((Fusil) arma).aplicarMejoraProgresiva();
@@ -133,7 +129,6 @@ public class Recolector {
             	    }
             	}
 
-            	// 2. Si no la tenía equipada, buscamos un espacio libre para dársela de cero
             	if (!armaEncontrada) {
             	    for (int i = 0; i < arsenal.length; i++) {
             	        if (arsenal[i] == null) {
@@ -150,7 +145,7 @@ public class Recolector {
             	                arsenal[i] = new Molotov(texturaBotella);
             	                System.out.println("¡Molotov obtenido del cofre!");
             	            }
-            	            break; // Salimos del bucle una vez que se equipa en el hueco libre
+            	            break;
             	        }
             	    }
             	}

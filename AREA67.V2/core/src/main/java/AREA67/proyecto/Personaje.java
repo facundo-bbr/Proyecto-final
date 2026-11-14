@@ -12,13 +12,12 @@
 	import com.badlogic.gdx.utils.Array;
 	
 	public class Personaje {
-	    // Posición y física
+	    
 	    private Vector2 posicion;
 	    public static float velocidadMovimiento = 200f;
 	    private boolean mirandoDerecha;
 	    private boolean seEstaMoviendo;
 	
-	    // Texturas y Animación
 	    private Texture sheetSoldado;
 	    private Animation<TextureRegion> animacionCaminar;
 	    private TextureRegion frameEstatico;
@@ -27,7 +26,6 @@
 	    
 	    private Vector2 direccionMirada = new Vector2(1, 0); // Por defecto mira a la derecha
 	
-	    // Sistemas del Jugador
 	    GestorVida salud = new GestorVida(100);
 	    GestorExperiencia exp = new GestorExperiencia();
 	    Recolector recolector = new Recolector(70f);
@@ -36,12 +34,10 @@
 	    private int contadorReducionDano = 0;
 	    
 	    
-	    // Constructor predeterminado (compatibilidad)
 	    public Personaje() {
 	        this(400, 300, null);
 	    }
 	
-	    // Constructor principal con posición inicial y textura para el arma inicial
 	    public Personaje(float xInicial, float yInicial, Texture texturaBala) {
 	        this.posicion = new Vector2(xInicial, yInicial);
 	        this.mirandoDerecha = true;
@@ -50,7 +46,6 @@
 	
 	       
 	
-	        // Carga y procesado de la textura del jugador
 	        sheetSoldado = new Texture(Gdx.files.internal("donpollo_derecha.png"));
 	        int anchoSoldado = sheetSoldado.getWidth() / 3;
 	        TextureRegion[][] matrizCortes = TextureRegion.split(sheetSoldado, anchoSoldado, sheetSoldado.getHeight());
@@ -64,21 +59,17 @@
 	        animacionCaminar = new Animation<TextureRegion>(0.15f, framesCaminar);
 	        frameActual = frameEstatico;
 	
-	        // Equipar arma inicial si se pasa la textura de la bala
 	        if (texturaBala != null) {
 	            this.arsenal[0] = new Fusil(texturaBala);
 	        }
 	    }
 	    
 	    public void actualizar(float deltaTime, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles,Array<Jefe> listaJefes) {
-	        // 1. Procesar movimiento por teclado
 	        procesarEntrada(deltaTime);
 	
-	        // 2. Actualizar estados del jugador y sistemas internos
 	        salud.actualizar(deltaTime);
 	        recolector.actualizar(deltaTime);
 	
-	        // 3. Actualizar animación
 	        if (seEstaMoviendo) {
 	            stateTime += deltaTime;
 	            frameActual = animacionCaminar.getKeyFrame(stateTime, true);
@@ -87,38 +78,29 @@
 	            frameActual = frameEstatico;
 	        }
 	
-	        // Girar el sprite según hacia dónde mira
 	        if (mirandoDerecha && frameActual.isFlipX()) {
 	            frameActual.flip(true, false);
 	        } else if (!mirandoDerecha && !frameActual.isFlipX()) {
 	            frameActual.flip(true, false);
 	        }
 	
-	        // 4. Actualizar armas del arsenal
-	     // 4. Actualizar armas del arsenal
 	        float centroX = getCentroX();
 	        float centroY = getCentroY();
 	        float ancho = frameActual.getRegionWidth();
 	        float alto = frameActual.getRegionHeight();
 	        for (Arma arma : arsenal) {
 	            if (arma != null) {
-	                // Si el arma es un Fusil o Lanzallamas, actualizamos su dirección
 	                if (arma instanceof Fusil) {
 	                    ((Fusil) arma).setDireccion(direccionMirada);
 	                } else if (arma instanceof ArmaLanzallamas) {
 	                    ((ArmaLanzallamas) arma).setDireccion(direccionMirada);
 	                }
 	                
-	                // NUEVO: Verificamos si es un arma que busca objetivos (Cuchillo, Molotov, etc.)
-	                // y le pasamos también la lista de jefes si tu arma lo soporta:
 	                if (arma instanceof ArmaCuchillo) {
-	                    // Si tienes un método específico para el cuchillo con jefes:
 	                    ((ArmaCuchillo) arma).actualizarConJefes(deltaTime,posicion.x, posicion.y, ancho, alto, listaEnemigos, listaJefes, listaProyectiles);
 	                } else if (arma instanceof Molotov) {
-	                    // Si tienes un método similar para el molotov:
 	                    ((Molotov) arma).actualizarConJefes(deltaTime, posicion.x, posicion.y, ancho, alto, listaEnemigos, listaJefes, listaProyectiles);
 	                } else {
-	                    // Demás armas estándar
 	                    arma.actualizar(deltaTime, centroX, centroY, listaEnemigos, listaProyectiles);
 	                }
 	            }
@@ -141,7 +123,7 @@
 	    public void aplicarReducionDano(float porcentaje) {
 	        this.multiplicadorDañoRecibido -= porcentaje;
 	        if (this.multiplicadorDañoRecibido < 0.7f) {
-	            this.multiplicadorDañoRecibido = 0.7f; // Tope del 30% de reducción total acumulada
+	            this.multiplicadorDañoRecibido = 0.7f; 
 	        }
 	    }
 	    
@@ -169,7 +151,6 @@
 	        float barraY = posicion.y + offsetY;
 	        float separacion = 14f;
 	
-	        // --- BARRA DE EXPERIENCIA (AMARILLA) ---
 	        float expActual = exp.getXpActual();
 	        float expMax = exp.getXpRequeridaActual();
 	        float porcentajeExp = Math.min(1f, expActual / expMax);
@@ -180,7 +161,6 @@
 	        shapeRenderer.setColor(Color.YELLOW);
 	        shapeRenderer.rect(barraX, barraY + separacion, anchoMaximo * porcentajeExp, altoBarra);
 	
-	        // --- BARRA DE VIDA (ROJA / VERDE) ---
 	        float porcentajeVida = (float) salud.getVidaActual() / salud.getVidaMaxima();
 	        float anchoActual = anchoMaximo * porcentajeVida;
 	
@@ -194,20 +174,15 @@
 	    }
 	
 	    public void recibirDano(int danoBase) {
-	        // Calculamos el daño real aplicando la reducción defensiva
 	        int dañoFinal = (int) (danoBase * multiplicadorDañoRecibido);
 	        
-	        // Aseguramos que al menos reciba 1 de daño si la vida debe restarse
 	        if (dañoFinal < 1 && danoBase > 0) {
 	            dañoFinal = 1; 
 	        }
 
-	        // Restableces el daño utilizando tu gestor de vida habitual
 	        if (salud != null) {
 	            salud.aplicardano(dañoFinal);
 	        } else {
-	            // O si lo manejas directamente con una variable de vida:
-	            // vidaActual -= dañoFinal;
 	        }
 	    }
 	
@@ -215,7 +190,6 @@
 	        return salud.getVidaActual() <= 0;
 	    }
 	
-	    // Getters y Setters de Posición y Dimensiones
 	    public float getX() { return posicion.x; }
 	    public float getY() { return posicion.y; }
 	    public void setX(float x) { this.posicion.x = x; }

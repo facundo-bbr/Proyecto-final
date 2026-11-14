@@ -33,8 +33,8 @@ public class Principal extends ApplicationAdapter {
     private OrthographicCamera camera;
 
     private float tiempoJuego;
-    private float intervaloJefe = 120f;        // 120 segundos = 2 minutos
-    private float tiempoUltimoJefe = 0f;       // Controla cuándo apareció el último jefe
+    private float intervaloJefe = 120f;       
+    private float tiempoUltimoJefe = 0f;      
     private BitmapFont fuenteSurvival;
     private BitmapFont fuenteTexto;
     
@@ -59,28 +59,24 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaLanzallamas;
     private Texture texturaFusil;
 
-    // Entidad Jugador
     private Personaje jugador;
     
-    //Musica y Sonidos
     private Music musicaDeFondo;
     private Sound sonidoSubidaDeNivel;
     private Sound sonidoSeleccion;
-    // Menús
+    
     private MenuMejora menuMejora;
     private MenuDerrota menuDerrota;
     private MenuPrincipal menuPrincipal;
     private MenuPausa menuPausa;
     private MenuOpciones menuOpciones;
     
-    // Listas del juego
     private Array<Jefe> listaJefes= new Array<>();;
     private Array<Proyectil> listaProyectiles = new Array<>();
     private Array<Enemigos> listaEnemigos = new Array<>();
     private Array<ObjetoSuelo> listaObjetosSuelo = new Array<>();
     private Array<Obstaculos> listaObstaculos = new Array<>();
 
-    // Recursos Enemigo
     private Texture texturaTilin;
     private Texture sheetZombieRojo;
     private Texture sheetZombieVerde;
@@ -105,7 +101,6 @@ public class Principal extends ApplicationAdapter {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         
-        // 1. Cargar la textura y configurar el wrap mode para repetición infinita
         image = new Texture("mapa.jpg");
 
         manager = new AssetManager();
@@ -143,22 +138,18 @@ public class Principal extends ApplicationAdapter {
         texturaTilin= new Texture ("tilin.png");
         texturaFusil=new Texture ("Fusil.png");
 
-        // Instancia del Personaje
         jugador = new Personaje(2048, 2048, texturaBala);
         
-        //Musica y Sonido
         musicaDeFondo = Gdx.audio.newMusic(Gdx.files.internal("Musica de fondo 1.mp3"));
         musicaDeFondo.setLooping(true);
         musicaDeFondo.setVolume(1f);
         musicaDeFondo.play();
 
-        // Efectos de sonido
         sonidoSubidaDeNivel = Gdx.audio.newSound(Gdx.files.internal("Sonido de subida de nivel.ogg"));
         sonidoSeleccion = Gdx.audio.newSound(Gdx.files.internal("seleccionar opcion.ogg"));
          
         
 
-        // Carga de Sprites del Zombi
         sheetZombieVerde = new Texture("zombieverdeizq.png");
         sheetZombieRojo = new Texture("zombie der.png");
         sheetEsqueleto = new Texture("Esqueleto_der.png");
@@ -184,7 +175,6 @@ public class Principal extends ApplicationAdapter {
         menuPausa = new MenuPausa(sonidoSeleccion);
         menuOpciones = new MenuOpciones(sonidoSeleccion);
         
-        // Generar obstáculos iniciales distribuidos libremente alrededor del centro
         int cantidadObstaculos = 15;
         for (int i = 0; i < cantidadObstaculos; i++) {
             float posX = com.badlogic.gdx.math.MathUtils.random(50f, 4046f); // Margen de 50px por los bordes
@@ -206,7 +196,6 @@ public class Principal extends ApplicationAdapter {
 	    }
 	    boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
 	    if (salirOpciones) {
-	    // Vuelve al flujo normal
 	    }
 	    	return;
 	    }
@@ -223,9 +212,9 @@ public class Principal extends ApplicationAdapter {
 	    if (!juegoIniciado) {
 	    	int accionMenuP = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
 	    	if (accionMenuP == 1) {
-	    		juegoIniciado = true; // Arranca el juego
+	    		juegoIniciado = true; 
 	    	} else if (accionMenuP == 2) {
-	    		menuOpciones.activar(camera); // ¡Abre el menú de configuración/opciones!
+	    		menuOpciones.activar(camera);
 	    }
 	    	return;
 	    }
@@ -240,7 +229,6 @@ public class Principal extends ApplicationAdapter {
 	    if (menuPausa.isActivo()) {
 	    	int accionPausa = menuPausa.manejarInputYRender(batch, camera, fuenteMenu, image);
 	    	if (accionPausa == 1) {
-	    // Continuar juego
 	    	} else if (accionPausa == 2) {
 	    		reiniciarJuego();
 	    		juegoIniciado = false;
@@ -272,22 +260,18 @@ public class Principal extends ApplicationAdapter {
             menuMejora.abrir();
         }
 
-        // Control del Flujo: Menú de Mejora Activo vs Lógica del Juego
         	if (!juegoPausado){
             tiempoJuego += deltaTime;
             
             if (tiempoJuego >= 600f) {
-                // Limpiamos opcionalmente el spawn normal si deseas que dejen de aparecer los demás
-                // (opcional: listaEnemigos.clear(); si quieres que la pantalla se limpie al llegar a los 10 min)
 
                 temporizadorTilin += deltaTime;
-                if (temporizadorTilin > 1.0f) { // Cada cuánto tiempo aparece Tilin (ej: 1 segundo)
+                if (temporizadorTilin > 1.0f) { 
                     float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
-                    float distanciaSpawn = 700f; // Fuera de la vista de la cámara
+                    float distanciaSpawn = 700f; 
                     float spawnX = centroPjX + MathUtils.cos(anguloRandom) * distanciaSpawn;
                     float spawnY = centroPjY + MathUtils.sin(anguloRandom) * distanciaSpawn;
 
-                    // Asegurar que Tilin spawnee dentro de los límites del mapa 4096x4096
                     spawnX = MathUtils.clamp(spawnX, 50f, 4046f);
                     spawnY = MathUtils.clamp(spawnY, 50f, 4046f);
 
@@ -301,17 +285,12 @@ public class Principal extends ApplicationAdapter {
                 }
 
             } else {
-                // =========================================================================
-                // FLUJO NORMAL (Antes de los 10 minutos)
-                // =========================================================================
-                
-                // 1. Spawneo de Jefes cada 30 segundos
+               
                 if (tiempoJuego - tiempoUltimoJefe >= intervaloJefe) {
                     spawnearJefe();
                     tiempoUltimoJefe = tiempoJuego; 
                 }
 
-                // 2. Spawneo de Zombies y Esqueletos
                 temporizadorSpawneo += deltaTime;
                 if (temporizadorSpawneo > 1.5f) {
                     int tipoEnemigo = com.badlogic.gdx.math.MathUtils.random(0, 2);
@@ -321,7 +300,6 @@ public class Principal extends ApplicationAdapter {
                     float spawnX = centroPjX + MathUtils.cos(anguloRandom) * distanciaSpawn;
                     float spawnY = centroPjY + MathUtils.sin(anguloRandom) * distanciaSpawn;
 
-                    // Limitar al mapa 4096
                     spawnX = MathUtils.clamp(spawnX, 50f, 4046f);
                     spawnY = MathUtils.clamp(spawnY, 50f, 4046f);
 
@@ -336,7 +314,6 @@ public class Principal extends ApplicationAdapter {
                     temporizadorSpawneo = 0f;
                 }
 
-                // 3. Spawneo de Obstáculos (Barriles) cada 30 segundos
                 temporizadorObstaculo += deltaTime;
                 if (temporizadorObstaculo >= 30.0f) {
                     float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
@@ -353,11 +330,9 @@ public class Principal extends ApplicationAdapter {
                 }
             }
 
-            // Actualizar movimiento, armas y cooldowns del jugador (movimiento libre)
             jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles,listaJefes);
             float minX = 0f;
             float minY = 0f;
-            // 4096 menos el tamaño/ancho de la hitbox o sprite del jugador para que no lo atraviese
             float maxX = 4096f - jugador.getAncho();
             float maxY = 4096f - jugador.getAlto();
 
@@ -366,7 +341,6 @@ public class Principal extends ApplicationAdapter {
 
   
 
-         // Colisiones: Proyectiles vs Enemigos y Obstáculos
             for (int i = listaProyectiles.size - 1; i >= 0; i--) {
                 Proyectil p = listaProyectiles.get(i);
                 if (p instanceof ProyectilMolotov) {
@@ -383,7 +357,6 @@ public class Principal extends ApplicationAdapter {
 
                 boolean impacto = false;
 
-                // 1. Colisión contra Enemigos
                 for (int j = listaEnemigos.size - 1; j >= 0; j--) {
                     Enemigos enemigo = listaEnemigos.get(j);
                     if (p.getBounds().overlaps(enemigo.getBounds())) {
@@ -415,7 +388,6 @@ public class Principal extends ApplicationAdapter {
                     }
                 }
 
-                // 2. Colisión contra Obstáculos
                 if (p.isActivo()) {
                     for (int k = listaObstaculos.size - 1; k >= 0; k--) {
                         Obstaculos obstaculo = listaObstaculos.get(k);
@@ -447,7 +419,6 @@ public class Principal extends ApplicationAdapter {
                 }
             }
             
-            // Colisiones: Persecución y Ataque del Enemigo al Jugador
             for (int i = listaEnemigos.size - 1; i >= 0; i--) {
                 Enemigos enemigo = listaEnemigos.get(i);
                 enemigo.actualizar(deltaTime);
@@ -465,13 +436,13 @@ public class Principal extends ApplicationAdapter {
                     
                     double probabilidad = Math.random();
 
-                    if (probabilidad < 0.10) {          // 10% de probabilidad (Gema Rara)
+                    if (probabilidad < 0.10) {          
                         varianteGema = "ROJA";
                         valorExperiencia = 50;  
-                    } else if (probabilidad < 0.35) {   // 25% de probabilidad (Gema Mediana - del 10% al 35%)
+                    } else if (probabilidad < 0.35) {   
                         varianteGema = "VERDE";
                         valorExperiencia = 25;  
-                    } else {                            // 65% restante (Gema Común)
+                    } else {                           
                         varianteGema = "AZUL";
                         valorExperiencia = 10;  
                     }
@@ -484,9 +455,9 @@ public class Principal extends ApplicationAdapter {
                 float centroEnemigoX = enemigo.getX() + (enemigo.getBounds().width / 2f);
                 float centroEnemigoY = enemigo.getY() + (enemigo.getBounds().height / 2f);
                 
-                if (enemigo instanceof Tilin) { // <--- Si tu clase se llama Tilin
+                if (enemigo instanceof Tilin) { 
                     if (Vector2.dst(centroPjX, centroPjY, centroEnemigoX, centroEnemigoY) < 50f) {
-                        jugador.recibirDano(1000); // ¡Le quita 1000 de vida al tocarlo!
+                        jugador.recibirDano(1000); 
                     }
                 }else {
                 
@@ -526,32 +497,26 @@ public class Principal extends ApplicationAdapter {
 
                     jefe.actualizar(deltaTime, centroPjX, centroPjY, jugador);
 
-                    // A. Verificar si el Jefe murió
                     if (jefe.estaMuerto()) {
                         float centroJefeX = jefe.getX() + (jefe.getBounds().width / 2f);
                         float centroJefeY = jefe.getY() + (jefe.getBounds().height / 2f);
 
-                        // Soltar recompensa (ej. un Cofre o una Gema Roja de mucha XP)
                         float lootX = centroJefeX - (texturaCofre.getWidth() / 2f);
                         float lootY = centroJefeY - (texturaCofre.getHeight() / 2f);
                         
-                        // Opción 1: Suelta una gema roja con 200 de XP
                         listaObjetosSuelo.add(new ObjetoSuelo(lootX, lootY, "GEMA_EXPERIENCIA", 200, "ROJA"));
                         
-                        // Opción 2 (Si quieres que suelte un cofre, descomenta la línea de abajo):
-                        // listaObjetosSuelo.add(new ObjetoSuelo(lootX, lootY, "COFRE_TESORO", 0, ""));
+                        
 
                         listaJefes.removeIndex(i);
                         continue;
                     }
 
-                    // B. Daño por contacto cuerpo a cuerpo al jugador
                     float centroJefeX = jefe.getX() + (jefe.getBounds().width / 2f);
                     float centroJefeY = jefe.getY() + (jefe.getBounds().height / 2f);
 
-                    // Usamos un radio un poco mayor (ej. 60f) porque el sprite del jefe (96x96) es más grande que el de los zombies (60x60)
                     if (Vector2.dst(centroPjX, centroPjY, centroJefeX, centroJefeY) < 60f) {
-                        jugador.recibirDano(20); // El jefe hace más daño que un enemigo normal
+                        jugador.recibirDano(20); 
                     }
                 }
             }
@@ -559,21 +524,16 @@ public class Principal extends ApplicationAdapter {
         } 
         	//------------------------------------------------------------
 
-        // =========================================================================
-        // CÁMARA E INFINITO (Sin límites ni clamp, siguiendo libremente al jugador)
-        // =========================================================================
+       
         	float mitadViewportW = camera.viewportWidth / 2f;
             float mitadViewportH = camera.viewportHeight / 2f;
 
-            // La cámara sigue al jugador, pero se limita exactamente al borde del mapa de 4096
             camera.position.x = MathUtils.clamp(jugador.getCentroX(), mitadViewportW, 4096f - mitadViewportW);
             camera.position.y = MathUtils.clamp(jugador.getCentroY(), mitadViewportH, 4096f - mitadViewportH);
             
             camera.update();
 
-        // =========================================================================
-        // 4. RENDERIZADO (SPRITE BATCH Y MAPA INFINITO EN BUCLE)
-        // =========================================================================
+      
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
@@ -590,16 +550,13 @@ public class Principal extends ApplicationAdapter {
 
         for (float x = inicioX; x < camIzq + camera.viewportWidth + anchoTextura; x += anchoTextura) {
             for (float y = inicioY; y < camAbajo + camera.viewportHeight + altoTextura; y += altoTextura) {
-                //batch.draw(image, x, y);
             }
         }
 
-        // B. Obstáculos del mapa
         for (Obstaculos obstaculo : listaObstaculos) {
             obstaculo.dibujar(batch);
         }
 
-        // C. Objetos del suelo (Gemas, Pollos, Cofres, Imanes)
         for (int i = listaObjetosSuelo.size - 1; i >= 0; i--) {
             ObjetoSuelo objeto = listaObjetosSuelo.get(i);
 
@@ -643,7 +600,6 @@ public class Principal extends ApplicationAdapter {
             batch.draw(texturaAElegir, objeto.getX(), objeto.getY());
         }
 
-        // D. Enemigos, Proyectiles y Jugador
         for (Enemigos enemigo : listaEnemigos) {
             enemigo.dibujar(batch);
         }
@@ -661,7 +617,6 @@ public class Principal extends ApplicationAdapter {
 
         jugador.dibujar(batch);
 
-        // E. Armas adicionales (como Bola de Pinchos)
         for (Arma arma : jugador.arsenal) {
             if (arma instanceof BolaPinchos) {
                 ((BolaPinchos) arma).dibujar(batch);
@@ -669,12 +624,10 @@ public class Principal extends ApplicationAdapter {
         }
 
 
-        // F. HUD de texto del juego
         dibujarUIHUD();
         
         batch.end();
 
-        // 5. RENDERIZADO (SHAPE RENDERER - BARRAS SOBRE EL JUGADOR)
         shapeRenderer.setProjectionMatrix(camera.combined);
         Gdx.gl.glEnable(com.badlogic.gdx.graphics.GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(com.badlogic.gdx.graphics.GL20.GL_SRC_ALPHA, com.badlogic.gdx.graphics.GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -700,7 +653,6 @@ public class Principal extends ApplicationAdapter {
        
         shapeRenderer.end();
 
-        // 6. MENÚ DE MEJORA
         if (menuMejora.isActivo()) {
             menuMejora.manejarInputYRender(batch, camera, fuenteMenu, image, jugador);
             return;
@@ -836,7 +788,6 @@ public class Principal extends ApplicationAdapter {
     }
     
     private void spawnearJefe() {
-        // Protección por si los arrays no se cargaron bien
         if (framesJefeCaminar == null || framesJefeAtaque == null || listaJefes == null) {
             System.out.println("Error: Las texturas del Jefe o la lista no están inicializadas.");
             return;

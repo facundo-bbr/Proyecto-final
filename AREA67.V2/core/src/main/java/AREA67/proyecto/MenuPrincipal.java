@@ -36,10 +36,7 @@ public class MenuPrincipal {
         this.rectSalir = new Rectangle(250, 170, 300, 45);
     }
 
-    /**
-     * Maneja el renderizado y los clics del menú.
-     * @return 0 = Continuar en el menú, 1 = Iniciar Juego, 2 = Abrir Opciones.
-     */
+   
     public int manejarMenu(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuenteMenu, Texture fondoMap) {
         ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
         
@@ -104,16 +101,15 @@ public class MenuPrincipal {
             layout.setText(fuenteMenu, textoSalir);
             fuenteMenu.draw(batch, textoSalir, rectSalir.x + (rectSalir.width - layout.width) / 2f, rectSalir.y + 32f);
 
-            // 1. Control por Teclado
             if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
                 batch.end();
-                return 1; // Iniciar Juego
+                return 1;
             } else if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_2)) {
                 batch.end();
-                return 2; // Abrir Opciones
+                return 2; 
             }
 
-            // 2. Control por Clic del Mouse
+           
             if (Gdx.input.justTouched()) {
                 Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
                 camera.unproject(touchPos);
@@ -126,13 +122,13 @@ public class MenuPrincipal {
                          sonidoSeleccion.play(1.0f);
                      }
                     batch.end();
-                    return 1; // Iniciar Juego
+                    return 1; 
                 } else if (rectConfig.contains(mouseX, mouseY)) {
                 	 if (sonidoSeleccion != null) {
                          sonidoSeleccion.play(1.0f);
                      }
                     batch.end();
-                    return 2; // Abrir Opciones
+                    return 2; 
                 } else if (rectSalir.contains(mouseX, mouseY)) {
                 	 if (sonidoSeleccion != null) {
                          sonidoSeleccion.play(1.0f);
@@ -143,7 +139,7 @@ public class MenuPrincipal {
         }
 
         batch.end();
-        return 0; // Seguir en el menú principal
+        return 0; 
     }
 
     public void dispose() {

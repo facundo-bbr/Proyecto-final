@@ -20,7 +20,6 @@ public class MenuPausa {
     
     private Sound sonidoSeleccion;
     
-    // Rectángulos para los 4 botones (Continuar, Opciones, Volver al menú, Salir)
     private Rectangle rectContinuar;
     private Rectangle rectOpciones;
     private Rectangle rectVolverMenu;
@@ -33,7 +32,7 @@ public class MenuPausa {
         this.layout = new GlyphLayout();
         
         float anchoBoton = 320;
-        float altoBoton = 45; // Ligeramente más compactos para que entren 4 bien
+        float altoBoton = 45; 
         
         rectContinuar = new Rectangle(0, 0, anchoBoton, altoBoton);
         rectOpciones = new Rectangle(0, 0, anchoBoton, altoBoton);
@@ -53,7 +52,7 @@ public class MenuPausa {
         
         float xBoton = camera.position.x - (anchoBoton / 2f);
         
-        // Posiciones verticales más cercanas entre sí para los 4 botones
+       
         float yContinuar = camera.position.y + 40;
         float yOpciones  = camera.position.y - 10;
         float yVolver    = camera.position.y - 60;
@@ -80,7 +79,6 @@ public class MenuPausa {
         }
         batch.end();
 
-        // 1. DIBUJAR LOS RECTÁNGULOS DE LOS BOTONES (Fondo Rojo)
         shapeRenderer.setProjectionMatrix(camera.combined);
         
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -93,11 +91,9 @@ public class MenuPausa {
         
 
 
-        // 2. DIBUJAR LOS TEXTOS Y TÍTULO
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        // TÍTULO "PAUSA"
         fuente.setColor(Color.RED);
         fuente.getData().setScale(2.5f);
         String textoPausa = "PAUSA";
@@ -106,32 +102,27 @@ public class MenuPausa {
         float yPausa = camera.position.y + 150;
         fuente.draw(batch, textoPausa, xPausa, yPausa);
 
-        // Textos de los 4 botones centrados (Letras Verdes)
         fuente.getData().setScale(1.1f);
         fuente.setColor(Color.RED);
 
-        // Texto Continuar
         String textoCont = "Continuar";
         layout.setText(fuente, textoCont);
         float xCont = rectContinuar.x + (rectContinuar.width - layout.width) / 2f;
         float yContTexto = rectContinuar.y + (rectContinuar.height + layout.height) / 2f - 4;
         fuente.draw(batch, textoCont, xCont, yContTexto);
 
-        // Texto Opciones
         String textoOpc = "Opciones";
         layout.setText(fuente, textoOpc);
         float xOpc = rectOpciones.x + (rectOpciones.width - layout.width) / 2f;
         float yOpcTexto = rectOpciones.y + (rectOpciones.height + layout.height) / 2f - 4;
         fuente.draw(batch, textoOpc, xOpc, yOpcTexto);
 
-        // Texto Volver al menú
         String textoVolver = "Volver al menu";
         layout.setText(fuente, textoVolver);
         float xVolver = rectVolverMenu.x + (rectVolverMenu.width - layout.width) / 2f;
         float yVolverTexto = rectVolverMenu.y + (rectVolverMenu.height + layout.height) / 2f - 4;
         fuente.draw(batch, textoVolver, xVolver, yVolverTexto);
 
-        // Texto Salir
         String textoSalir = "Salir";
         layout.setText(fuente, textoSalir);
         float xSalir = rectSalir.x + (rectSalir.width - layout.width) / 2f;
@@ -140,7 +131,6 @@ public class MenuPausa {
 
         batch.end();
 
-        // 3. DETECTAR CLICS (4 opciones mapeadas)
         if (Gdx.input.justTouched()) {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
@@ -148,21 +138,20 @@ public class MenuPausa {
             if (rectContinuar.contains(touchPos.x, touchPos.y)) {
                 if (sonidoSeleccion != null) sonidoSeleccion.play(1.0f);
                 desactivar();
-                return 1; // Continuar
+                return 1; 
             }
             if (rectOpciones.contains(touchPos.x, touchPos.y)) {
                 if (sonidoSeleccion != null) sonidoSeleccion.play(1.0f);
-                // No desactivamos el menú de pausa por completo, o devolvemos un código específico (ej. 4) para abrir Opciones
-                return 4; // Abrir MenuOpciones
+                return 4; 
             }
             if (rectVolverMenu.contains(touchPos.x, touchPos.y)) {
                 if (sonidoSeleccion != null) sonidoSeleccion.play(1.0f);
                 desactivar();
-                return 2; // Volver al menú principal
+                return 2; 
             }
             if (rectSalir.contains(touchPos.x, touchPos.y)) {
                 if (sonidoSeleccion != null) sonidoSeleccion.play(1.0f);
-                return 3; // Salir del juego
+                return 3; 
             }
         }
 

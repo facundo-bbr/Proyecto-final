@@ -11,7 +11,7 @@ public class Cuchillo extends Proyectil {
     private float anguloRotacion;
     private float tiempoDeVida;
     
-    // Cambiamos a Object para que pueda aceptar tanto "enemigos" como "Jefe"
+
     private Object objetivo;
 
     public Cuchillo(Texture textura, float origenX, float origenY, Object objetivo, int danoArma, float velocidadCuchillo) {
@@ -23,11 +23,11 @@ public class Cuchillo extends Proyectil {
         this.tiempoDeVida = 4.0f; 
     }
 
-    // Sobrecargamos el método actualizar para que sepa validar si el objetivo sigue vivo en alguna de las dos listas
+
     public void actualizarConJefes(float deltaTime, Array<Enemigos> listaEnemigos, Array<Jefe> listaJefes) {
         if (!activo) return;
 
-        // Comprobamos si el objetivo sigue existiendo según su tipo
+      
         boolean objetivoValido = false;
         float objX = 0;
         float objY = 0;
@@ -36,7 +36,7 @@ public class Cuchillo extends Proyectil {
             Jefe j = (Jefe) objetivo;
             if (j != null && !j.estaMuerto() && (listaJefes == null || listaJefes.contains(j, true))) {
                 objetivoValido = true;
-                // El centro del jefe ya lo calculabas bien con bounds
+              
                 objX = j.getX() + (j.getBounds().width / 2f);
                 objY = j.getY() + (j.getBounds().height / 2f);
             }
@@ -45,15 +45,14 @@ public class Cuchillo extends Proyectil {
             if (e != null && listaEnemigos != null && listaEnemigos.contains(e, true)) {
                 objetivoValido = true;
                 
-                // ¡AQUÍ ESTÁ EL CAMBIO! Sumamos la mitad del alto/ancho de su bounds (o del sprite)
-                // para que el cuchillo vaya al pecho y no a los pies (e.getY())
+
                 if (e.getBounds() != null) {
                     objX = e.getBounds().x + (e.getBounds().width / 2f);
                     objY = e.getBounds().y + (e.getBounds().height / 2f);
                 } else {
-                    // Por si acaso usas getWidth()/getHeight() directamente en la clase enemigos:
+
                     objX = e.getX(); 
-                    objY = e.getY() + 30f; // Ajusta este valor si el enemigo es más alto/bajo
+                    objY = e.getY() + 30f; 
                 }
             }
         }
@@ -80,7 +79,7 @@ public class Cuchillo extends Proyectil {
         }
     }
 
-    // Mantenemos este por compatibilidad por si se llama desde otra parte que solo pasa enemigos
+
     @Override
     public void actualizar(float deltaTime, Array<Enemigos> listaEnemigos) {
         actualizarConJefes(deltaTime, listaEnemigos, null);
