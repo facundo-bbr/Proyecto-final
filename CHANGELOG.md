@@ -1,3 +1,22 @@
+## [13-11-2026]
+
+-Cambios
+
+-Se agrego musica de fondo para el juego
+
+-Se agregaron sonidos para cuando clikeas alguna opcion en el menu y cuando suber de nivel
+
+-Se agrego la logica para que salga el rifle en el menuMejora y el los cofres
+
+-Se cambio el tamaño del mapa
+
+-Se agrego al enemigo final:Tilin
+
+-Arreglos
+
+-Se soluciono un problema que hacia que el jefe no reciba daño de algunas armas
+
+
 ## [12-11-2026]
 
 -cambio
