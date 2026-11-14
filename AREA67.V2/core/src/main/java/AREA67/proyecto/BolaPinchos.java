@@ -12,11 +12,11 @@ public class BolaPinchos extends Arma {
     private float velocidadGiro = 180f; 
     private float xActual, yActual; 
 
-    // --- NUEVAS VARIABLES DE CONTROL DE TIEMPO ---
-    private boolean activoCiclo = true; // Si está girando actualmente
-    private float tiempoActivo = 3.0f;    // Cuánto tiempo dura girando (segundos)
-    private float cooldown = 5.0f;        // Tiempo que pasa oculta antes de volver a salir
-    private float temporizadorCiclo = 0f; // Reloj interno del ciclo
+    
+    private boolean activoCiclo = true; 
+    private float tiempoActivo = 3.0f;    
+    private float cooldown = 5.0f;        
+    private float temporizadorCiclo = 0f; 
 
     public BolaPinchos(Texture texturaBola) {
         super("Bola de Pinchos", 120, 0f); 
@@ -26,11 +26,11 @@ public class BolaPinchos extends Arma {
 
     @Override
     public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
-        // Actualizamos el temporizador del ciclo
+        
         temporizadorCiclo += deltaTime;
 
         if (activoCiclo) {
-            // --- FASE 1: GIRANDO Y DAÑANDO ---
+           
             angulo -= velocidadGiro * deltaTime;
             if (angulo < 0) angulo += 360f;
 
@@ -38,7 +38,7 @@ public class BolaPinchos extends Arma {
             xActual = jugadorX + (float) Math.cos(rad) * radioOrbita;
             yActual = jugadorY + (float) Math.sin(rad) * radioOrbita;
 
-            // Comprobar colisiones mientras está activa
+           
             if (listaEnemigos != null) {
                 Rectangle boundsBola = getBounds();
                 for (int i = 0; i < listaEnemigos.size; i++) {
@@ -49,26 +49,24 @@ public class BolaPinchos extends Arma {
                 }
             }
 
-            // Si se acabó el tiempo activo, pasa a modo cooldown (desaparece)
+           
             if (temporizadorCiclo >= tiempoActivo) {
                 activoCiclo = false;
-                temporizadorCiclo = 0f; // Reiniciamos reloj para el cooldown
+                temporizadorCiclo = 0f; 
             }
 
         } else {
-            // --- FASE 2: EN COOLDOWN (DESAPARECIDA) ---
-            // Aquí la bola no se dibuja ni hace daño
 
-            // Si se acabó el tiempo de espera, vuelve a aparecer
+
             if (temporizadorCiclo >= cooldown) {
                 activoCiclo = true;
-                temporizadorCiclo = 0f; // Reiniciamos reloj para el tiempo activo
+                temporizadorCiclo = 0f; 
             }
         }
     }
 
     public void dibujar(SpriteBatch batch) {
-        // Solo se dibuja si el ciclo está activo
+
         if (activoCiclo && texturaBola != null) {
             float ancho = texturaBola.getWidth();
             float alto = texturaBola.getHeight();
@@ -82,6 +80,6 @@ public class BolaPinchos extends Arma {
 
     @Override
     public void disparar(float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
-        // No aplica para armas de órbita
+        
     }
 }

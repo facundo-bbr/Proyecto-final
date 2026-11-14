@@ -5,7 +5,7 @@ public class GestorExperiencia {
     private int xpActual;
     private int xpRequeridaActual;
     private int[] umbralesPorNivel;
-    private int nivelesPendientes; // <-- NUEVO: Para rastrear las mejoras sin reclamar
+    private int nivelesPendientes; 
     
     public GestorExperiencia() {
         this.nivelActual = 1;
@@ -31,7 +31,7 @@ public class GestorExperiencia {
         xpActual -= xpRequeridaActual;
         
         nivelActual++;
-        nivelesPendientes++; // <-- NUEVO: Sumamos 1 nivel pendiente al marcador
+        nivelesPendientes++;
         
         actualizarXpRequerida();
 
@@ -46,7 +46,7 @@ public class GestorExperiencia {
         }
     }
     
-    // --- NUEVOS MÉTODOS PARA EL MENÚ DE MEJORA ---
+   
     public boolean tieneNivelesPendientes() {
         return nivelesPendientes > 0;
     }

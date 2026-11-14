@@ -24,10 +24,8 @@ public class MenuMejora {
     private Sound sonidoLevelUp;
     private Sound sonidoSeleccion;
     
-    // Rectángulos de las 3 tarjetas para la interfaz y clics del mouse
     private Rectangle[] rectTarjetas = new Rectangle[3];
     
-    // Texturas de armas e iconos para estadísticas
     private Texture texturaCuchillo;
     private Texture texturaPincho;
     private Texture texturaBolafuego;
@@ -69,7 +67,7 @@ public class MenuMejora {
         this.activo = true;
         generarOpcionesAleatorias();
         if (sonidoLevelUp != null) {
-            sonidoLevelUp.play(1.0f); // Volumen 1.0 (puedes ajustarlo, ej. 0.5f)
+            sonidoLevelUp.play(1.0f); 
         }
     }
 
@@ -83,13 +81,13 @@ public class MenuMejora {
 
     private void generarOpcionesAleatorias() {
         String[] poolDescripciones = {
-            "Recatate (+10 Daño de Armas)",          // Tipo 0
-            "Curar Vida Completa",                  // Tipo 1
-            "Mentira Colgala(+15 Velocidad de Movimiento)", // Tipo 2
-            "Aumentar Rango de Recoleccion",        // Tipo 3
-            "Cuchillos",        // Tipo 4
-            "Bola de Pinchos",              // Tipo 5
-            "Lanzallamas",                   // Tipo 6
+            "Recatate (+10 Daño de Armas)",          
+            "Curar Vida Completa",                  
+            "Mentira Colgala(+15 Velocidad de Movimiento)", 
+            "Aumentar Rango de Recoleccion",        
+            "Cuchillos",        
+            "Bola de Pinchos",             
+            "Lanzallamas",                   
             "Escudovich(Reducir Daño Recibido un 10%)",
             "Corazon de Ceda (+20 HP max)",
             "La peligroza",
@@ -125,7 +123,6 @@ public class MenuMejora {
         }
     }
 
-    // Método unificado idéntico al de MenuDerrota para manejar input y renderizado a la vez
     public void manejarInputYRender(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuente, Texture fondoMapa, Personaje jugador) {
         if (!activo) return;
 
@@ -134,7 +131,6 @@ public class MenuMejora {
         float camY = camera.position.y;
        
 
-        // 0. DIBUJAR EL FONDO PRIMERO (Para que nunca quede en negro)
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         if (fondoMapa != null) {
@@ -142,42 +138,38 @@ public class MenuMejora {
         }
         batch.end();
 
-        // Posiciones centrales de las 3 tarjetas en base a la cámara actual
         float anchoCard = 460;
         float altoCard = 65;
         float xCard = camX - (anchoCard / 2f);
         float[] yCards = {
-            camY + 45,   // Superior
-            camY - 25,   // Central
-            camY - 95    // Inferior
+            camY + 45,   
+            camY - 25,   
+            camY - 95    
         };
 
         for (int i = 0; i < 3; i++) {
             rectTarjetas[i].set(xCard, yCards[i], anchoCard, altoCard);
         }
 
-        // 1. DIBUJAR LOS RECTÁNGULOS DE LAS TARJETAS (Fondo y Bordes Dorados)
         shapeRenderer.setProjectionMatrix(camera.combined);
         
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(0.35f, 0.35f, 0.45f, 1f); // Color de la tarjeta
+        shapeRenderer.setColor(0.35f, 0.35f, 0.45f, 1f); 
         for (int i = 0; i < 3; i++) {
             shapeRenderer.rect(rectTarjetas[i].x, rectTarjetas[i].y, rectTarjetas[i].width, rectTarjetas[i].height);
         }
         shapeRenderer.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        shapeRenderer.setColor(0.85f, 0.75f, 0.3f, 1f); // Borde dorado
+        shapeRenderer.setColor(0.85f, 0.75f, 0.3f, 1f);
         for (int i = 0; i < 3; i++) {
             shapeRenderer.rect(rectTarjetas[i].x, rectTarjetas[i].y, rectTarjetas[i].width, rectTarjetas[i].height);
         }
         shapeRenderer.end();
 
-        // 2. DIBUJAR LOS TEXTOS E ICONOS
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        // TÍTULO "Level Up!"
         fuente.setColor(Color.WHITE);
         fuente.getData().setScale(2.2f);
         String titulo = "Level Up!";
@@ -186,14 +178,12 @@ public class MenuMejora {
         float yTitulo = camY + 160;
         fuente.draw(batch, titulo, xTitulo, yTitulo);
 
-        // Textos y elementos de las tarjetas
         fuente.getData().setScale(1.1f);
 
         for (int i = 0; i < 3; i++) {
             float tarjetaX = rectTarjetas[i].x;
             float tarjetaY = rectTarjetas[i].y;
 
-            // Icono independiente
             Texture icono = obtenerIconoParaTipo(tipoMejora[i]);
             if (icono != null) {
                 float iconoSize = 45;
@@ -202,7 +192,6 @@ public class MenuMejora {
                 batch.draw(icono, iconoX, iconoY, iconoSize, iconoSize);
             }
 
-            // Texto de la opción
             fuente.setColor(Color.WHITE);
             String textoOpcion = "[" + (i + 1) + "] " + opciones[i];
             
@@ -213,7 +202,6 @@ public class MenuMejora {
 
         batch.end();
 
-        // 3. DETECTAR ENTRADA (Teclado o Clics del Mouse)
         int seleccion = -1;
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1) || Gdx.input.isKeyJustPressed(Input.Keys.UP)) {
@@ -267,7 +255,7 @@ public class MenuMejora {
                     jugador.getRecolector().mejorarRango(15f);
                 }
                 break;
-            case 4: // Cuchillo Teledirigido
+            case 4: 
                 ArmaCuchillo cuchilloExistente = null;
                 for (Arma arma : jugador.getArsenal()) {
                     if (arma instanceof ArmaCuchillo) {
@@ -277,7 +265,7 @@ public class MenuMejora {
                 }
                 
                 if (cuchilloExistente != null) {
-                    cuchilloExistente.aplicarMejoraProgresiva(); // Llama a su propia lógica interna
+                    cuchilloExistente.aplicarMejoraProgresiva(); 
                 } else {
                     for (int i = 0; i < jugador.getArsenal().length; i++) {
                         if (jugador.getArsenal()[i] == null) {
@@ -288,7 +276,7 @@ public class MenuMejora {
                 }
                 break;
            
-            case 5: // Bola de Pinchos
+            case 5:
                 BolaPinchos pinchosExistente = null;
                 for (Arma arma : jugador.getArsenal()) {
                     if (arma instanceof BolaPinchos) {
@@ -309,7 +297,7 @@ public class MenuMejora {
                 }
                 break;
                 
-            case 6: // Lanzallamas
+            case 6:
                 ArmaLanzallamas lanzallamasExistente = null;
                 for (Arma arma : jugador.getArsenal()) {
                     if (arma instanceof ArmaLanzallamas) {
@@ -330,7 +318,7 @@ public class MenuMejora {
                 }
                 break;
                 
-            case 7: // Reducción de daño (Límite 3 veces / 0.30)
+            case 7: 
                 if (jugador.getContadorReducionDano() < 3) {
                     jugador.aplicarReducionDano(0.10f);
                     jugador.incrementarContadorReducionDano();
@@ -339,29 +327,29 @@ public class MenuMejora {
                 }
                 break;
             case 8:
-                // Aumenta la vida máxima y opcionalmente cura al jugador esa misma cantidad
+                
                 if (jugador.getGestorVida() != null) {
                     jugador.getGestorVida().aumentarVidaMaxima(20);
                 }
                 break;
             case 9:
             	Molotov molotovExistente = null;
-            	for (Arma arma : jugador.getArsenal()) { // Asegúrate de usar .getArsenal() o tu array según corresponda
+            	for (Arma arma : jugador.getArsenal()) { 
             	    if (arma instanceof Molotov) {
             	        molotovExistente = (Molotov) arma;
             	        break;
             	    }
             	}
 
-            	// 2. Si ya lo tiene, aplica la mejora progresiva (daño / cooldown)
+            	
             	if (molotovExistente != null) {
             	    molotovExistente.aplicarMejoraProgresiva();
             	    System.out.println("¡Molotov mejorado de nivel!");
             	} else {
-            	    // 3. Si no lo tiene, lo equipa en el primer espacio libre del arsenal
+            	   
             	    for (int i = 0; i < jugador.getArsenal().length; i++) {
             	        if (jugador.getArsenal()[i] == null) {
-            	            jugador.getArsenal()[i] = new Molotov(texturaBotella); // texturas de la botella
+            	            jugador.getArsenal()[i] = new Molotov(texturaBotella); 
             	            System.out.println("¡Nuevo Molotov añadido al arsenal!");
             	            break;
             	        }
@@ -377,15 +365,15 @@ public class MenuMejora {
                     }
                 }
 
-                // 2. Si ya lo tiene, aplica la mejora progresiva (daño / cooldown / cadencia)
+                
                 if (rifleExistente != null) {
                     rifleExistente.aplicarMejoraProgresiva();
                     System.out.println("¡Rifle mejorado de nivel!");
                 } else {
-                    // 3. Si no lo tiene, lo equipa en el primer espacio libre del arsenal
+                   
                     for (int i = 0; i < jugador.getArsenal().length; i++) {
                         if (jugador.getArsenal()[i] == null) {
-                            jugador.getArsenal()[i] = new Fusil(texturaFusil); // Reemplaza con la textura o parámetros de tu rifle
+                            jugador.getArsenal()[i] = new Fusil(texturaFusil); 
                             System.out.println("¡Nuevo Rifle añadido al arsenal!");
                             break;
                         }
@@ -404,7 +392,7 @@ public class MenuMejora {
         if (sonidoLevelUp != null) {
             sonidoLevelUp.dispose();
         }
-        if (sonidoSeleccion != null) { // <-- Liberar memoria
+        if (sonidoSeleccion != null) { 
             sonidoSeleccion.dispose();
         }
     }

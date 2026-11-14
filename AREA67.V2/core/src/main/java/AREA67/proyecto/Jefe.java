@@ -10,8 +10,8 @@
 	
 	public class Jefe {
 	    private float x, y;
-	    private float velocidad = 80f; // Un poco más lento pero imponente
-	    private int vida = 1500;       // Mucha más vida que un enemigo normal
+	    private float velocidad = 80f; 
+	    private int vida = 1500;      
 	    private int dañoAtaque = 30;
 	    protected float tiempoDesdeUltimoImpacto = 0f;
 	    protected static final float COOLDOWN_DANIO = 0.3f;
@@ -19,21 +19,21 @@
 	    private Rectangle bounds;
 	    private boolean muerto = false;
 	
-	    // Animaciones
+	  
 	    private Animation<TextureRegion> animacionCaminar;
 	    private Animation<TextureRegion> animacionAtaque;
 	    private float tiempoEstado = 0f;
 	
-	    // Control de estados de IA del Jefe
+	   
 	    private boolean atacando = false;
 	    private float temporizadorAtaque = 0f;
-	    private float cooldownAtaque = 3.0f; // Ataca cada 3 segundos
-	    private float distanciaIdeal = 100f; // Se acerca pero se detiene antes de tocar al jugador
+	    private float cooldownAtaque = 3.0f; 
+	    private float distanciaIdeal = 100f; 
 	
 	    public Jefe(Array<TextureRegion> framesCaminar, Array<TextureRegion> framesAtaque, float x, float y) {
 	        this.x = x;
 	        this.y = y;
-	        this.bounds = new Rectangle(x, y, 96, 96); // Ajusta el tamaño según tus sprites
+	        this.bounds = new Rectangle(x, y, 96, 96); 
 	
 	        animacionCaminar = new Animation<TextureRegion>(0.15f, framesCaminar, Animation.PlayMode.LOOP);
 	        animacionAtaque = new Animation<TextureRegion>(0.1f, framesAtaque, Animation.PlayMode.NORMAL);
@@ -51,46 +51,43 @@
 	        float distanciaAlJugador = Vector2.dst(x, y, jugadorX, jugadorY);
 	
 	        if (atacando) {
-	            // Si está ejecutando la animación de ataque, esperamos a que termine
+	           
 	            if (animacionAtaque.isAnimationFinished(tiempoEstado)) {
 	                atacando = false;
 	                tiempoEstado = 0f;
 	            }
 	        } else {
-	            // Lógica de movimiento: Se acerca solo si está más lejos que su distancia ideal
+	           
 	            if (distanciaAlJugador > distanciaIdeal) {
-	                // Moverse hacia el jugador
+	               
 	                float angulo = (float) Math.atan2(jugadorY - y, jugadorX - x);
 	                x += Math.cos(angulo) * velocidad * deltaTime;
 	                y += Math.sin(angulo) * velocidad * deltaTime;
 	            }
 	
-	            // Control del cooldown para lanzar la onda expansiva
-	         // Definimos un radio de activación para el ataque (ej: 180 píxeles)
+	         
 	            float rangoParaAtacar = 160f;
 
 	            if (distanciaAlJugador <= rangoParaAtacar) {
-	                // Solo acumulamos tiempo para atacar si el jugador está cerca
+	               
 	                temporizadorAtaque += deltaTime;
 	                if (temporizadorAtaque >= cooldownAtaque) {
 	                    iniciarAtaque(jugadorX, jugadorY, jugador, distanciaAlJugador);
 	                    temporizadorAtaque = 0f;
 	                }
 	            } else {
-	                // Opcional: si el jugador se aleja mientras cargaba el ataque, 
-	                // podemos congelar o mantener el temporizador para que no se reinicie injustamente, 
-	                // o simplemente dejarlo quieto. Aquí lo dejamos estático hasta que vuelva a acercarse.
+	              
 	            }
 	        }
 	    }
 	
 	    private void iniciarAtaque(float jugadorX, float jugadorY, Personaje jugador, float distanciaAlJugador) {
 	        atacando = true;
-	        tiempoEstado = 0f; // Reinicia el tiempo para que la animación de ataque comience desde el frame 1
+	        tiempoEstado = 0f;
 	
 	        System.out.println("¡El Jefe prepara una Onda Expansiva!");
 	
-	        // Comprobamos si el jugador está dentro del radio de la onda expansiva (ej. 160 píxeles alrededor del jefe)
+	       
 	        float radioOndaExpansiva = 160f;
 	        if (distanciaAlJugador <= radioOndaExpansiva) {
 	            jugador.recibirDano(dañoAtaque);
@@ -98,10 +95,10 @@
 	        }
 	    }
 	    public void recibirDano(int cantidad) {
-	        // Si el jefe ya está muerto, no hacemos nada
+	       
 	        if (muerto) return;
 
-	        // 1. CORRECCIÓN CLAVE: Si el tiempo es mayor a 0, significa que sigue en periodo de inmunidad (cooldown)
+	       
 	        if (tiempoDesdeUltimoImpacto > 0) {
 	            return; 
 	        }
@@ -109,7 +106,7 @@
 	        if (cantidad > 0) {
 	            vida = Math.max(0, vida - cantidad);
 	            
-	            // 2. CORRECCIÓN CLAVE: Activamos el cooldown fijándolo en 0.3f (para que empiece a restar en el actualizar)
+	          
 	            tiempoDesdeUltimoImpacto = COOLDOWN_DANIO; 
 	            
 	            System.out.println("¡Jefe recibió " + cantidad + " de daño! Vida restante: " + vida);
@@ -135,23 +132,22 @@
 	    
 	    public void dibujarOndaExpansiva(ShapeRenderer shapeRenderer) {
 	        if (atacando) {
-	            // Calculamos el progreso de la animación de ataque (de 0.0 a 1.0)
+	          
 	            float duracionTotal = animacionAtaque.getAnimationDuration();
 	            float progreso = Math.min(tiempoEstado / duracionTotal, 1.0f);
 	            	
-	            // El radio crece desde 0 hasta el radio máximo de la onda (ej. 160 píxeles)
+	           
 	            float radioMaximo = 160f;
 	            float radioActual = radioMaximo * progreso;
 	
-	            // Dibujamos un círculo de advertencia/onda (puedes ajustar el color RGBA)
-	            // Rojo translúcido que se va desvaneciendo conforme se expande
+	           
 	            shapeRenderer.setColor(1f, 0.2f, 0.2f, 0.6f * (1.0f - progreso));
 	            
-	            // Obtenemos el centro exacto del jefe
+	          
 	            float centroX = x + (bounds.width / 2f);
 	            float centroY = y + (bounds.height / 2f);
 	            
-	            // Dibujamos el círculo en modo línea o relleno (aquí usamos círculos concéntricos o línea gruesa)
+	          
 	            shapeRenderer.circle(centroX, centroY, radioActual);
 	        }
 	    }

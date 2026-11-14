@@ -31,15 +31,13 @@ public class Obstaculos {
         }
     }
 
-    // Modificamos recibirDano para respetar el cooldown
     public void recibirDano(int cantidad) {
         if (destruido) return;
         
-        // Si todavía está en periodo de inmunidad, ignoramos el golpe
         if (tiempoDesdeUltimoImpacto > 0) return;
 
         vida -= cantidad;
-        tiempoDesdeUltimoImpacto = COOLDOWN_DANIO; // Reiniciamos el tiempo de espera
+        tiempoDesdeUltimoImpacto = COOLDOWN_DANIO; 
 
         if (vida <= 0) {
             vida = 0;
@@ -47,12 +45,10 @@ public class Obstaculos {
         }
     }
 
-    // Comprueba si el obstáculo ha sido destruido
     public boolean estaDestruido() {
         return destruido;
     }
 
-    // Método que genera y suelta aleatoriamente un ObjetoSuelo al romperse
     public ObjetoSuelo soltarObjeto() {
         if (!destruido) return null;
 
@@ -61,31 +57,29 @@ public class Obstaculos {
         
         int valorAsignado = 10;
         String varianteAsignada = "NORMAL";
-        float probabilidad = random.nextFloat(); // o MathUtils.random() según uses en tu clase
+        float probabilidad = random.nextFloat(); 
 
         switch (tipoSeleccionado) {
             case "GEMA_EXPERIENCIA":
-                // 70% de probabilidad de gema verde (baja), 30% de gema roja (alta)
-            	if (probabilidad < 0.15f) {          // 15% de probabilidad (Variante Roja - Muy valiosa)
+            	if (probabilidad < 0.15f) {          
             	    varianteAsignada = "ROJA";
             	    valorAsignado = 50; 
-            	} else if (probabilidad < 0.50f) {   // 35% de probabilidad (Variante Verde - Intermedia, desde el 15% hasta el 50%)
+            	} else if (probabilidad < 0.50f) {   
             	    varianteAsignada = "VERDE";
             	    valorAsignado = 25; 
-            	} else {                            // El 50% restante (Variante Azul - Común)
+            	} else {                            
             	    varianteAsignada = "AZUL";
             	    valorAsignado = 10; 
             	}
                 break;
                 
             case "CURACION":
-                // Comida normal o comida grande
                 if (random.nextFloat() < 0.6f) {
                     varianteAsignada = "POLLO";
-                    valorAsignado = 30; // Cura poco
+                    valorAsignado = 30; 
                 } else {
                     varianteAsignada = "QUESO";
-                    valorAsignado = 50; // Cura bastante
+                    valorAsignado = 50; 
                 }
                 break;
                 
@@ -96,7 +90,7 @@ public class Obstaculos {
                 
             case "IMAN":
                 varianteAsignada = "NORMAL";
-                valorAsignado = 5; // Duración en segundos
+                valorAsignado = 5; 
                 break;
         }
 
@@ -108,7 +102,6 @@ public class Obstaculos {
 
       
 
-    // Rectángulo de colisiones para detectar impactos de balas
     public Rectangle getBounds() {
         return new Rectangle(x, y, getAncho(), getAlto());
     }
@@ -119,7 +112,6 @@ public class Obstaculos {
         }
     }
 
-    // Getters y Setters
     public float getX() { return x; }
     public float getY() { return y; }
     public float getAncho() { return textura != null ? textura.getWidth() : 32f; }

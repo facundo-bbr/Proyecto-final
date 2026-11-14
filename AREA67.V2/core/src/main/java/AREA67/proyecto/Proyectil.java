@@ -29,6 +29,6 @@ public abstract class Proyectil {
     }
     
     public void destruir() {
-        this.activo = false; // Desactiva el proyectil para que el bucle principal lo elimine de la lista
+        this.activo = false;
     }
 }

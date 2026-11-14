@@ -25,10 +25,8 @@ public abstract class Arma {
         }
     }
 
-    // Ahora acepta cualquier proyectil que herede de Proyectil
     public abstract void disparar(float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles);
 
-    // Getters y setters...
     public String getNombre() { return nombre; }
     public int getDano() { return dano; }
     public void mejorarDano(int incremento) { this.dano += incremento; }
@@ -39,19 +37,15 @@ public abstract class Arma {
         contadorMejorasArma++;
         
         if (contadorMejorasArma <= 3) {
-            // Primeras 3 veces: Aumenta el daño en 10
             this.dano += 15;
             System.out.println("¡Arma mejorada! Daño aumentado a: " + this.dano);
         } else if (contadorMejorasArma <= 5) {
-            // Veces 4 y 5: Reduce el tiempo entre disparos (cooldown)
-            this.cadenciaAtaque -= 0.15f; // Ajusta este valor según la escala de tiempo de tu juego
-            // Asegúrate de que el cooldown no baje de un límite seguro (ej. 0.1f)
+            this.cadenciaAtaque -= 0.15f;
             if (this.cadenciaAtaque < 0.1f) {
                 this.cadenciaAtaque = 0.1f;
             }
             System.out.println("¡Arma mejorada! Cooldown reducido a: " + this.cadenciaAtaque);
         } else {
-            // Si ya superó las 5 mejoras, puedes darle un extra genérico de daño
             this.dano += 5;
             System.out.println("¡Arma mejorada al máximo nivel! Daño extra: " + this.dano);
         }

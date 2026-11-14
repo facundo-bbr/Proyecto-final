@@ -5,8 +5,8 @@ import com.badlogic.gdx.math.Vector2;
 public class ObjetoSuelo {
     private Vector2 posicion;
     private boolean recogido;
-    private String tipo; // Ej: "GEMA_EXPERIENCIA", "POLLO_CURACION", "COFRE_TESORO", "IMAN"
-    private int valor;   // Cantidad de experiencia, vida a curar o segundos de duración
+    private String tipo; 
+    private int valor;   
     private String variante;
 
     public ObjetoSuelo(float x, float y, String tipo, int valor,String variante) {
@@ -17,7 +17,6 @@ public class ObjetoSuelo {
         this.variante = variante;
     }
 
-    // Métodos requeridos por la clase Recolector
     public boolean estaRecogido() { return recogido; }
     public void marcarComoRecogido() { this.recogido = true; }
     public String getTipo() { return tipo; }

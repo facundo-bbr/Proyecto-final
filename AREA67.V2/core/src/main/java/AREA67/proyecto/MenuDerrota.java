@@ -56,20 +56,17 @@ public class MenuDerrota {
     public int manejarInputYRender(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuente, Texture fondoMapa) {
         if (!activo) return 0;
 
-        // 0. DIBUJAR EL FONDO PRIMERO (Para que nunca quede en negro al minimizar/maximizar)
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         if (fondoMapa != null) {
-            // Dibuja el fondo en 0,0 o adaptado a la posición de la cámara según tu juego
             batch.draw(fondoMapa, 0, 0); 
         }
         batch.end();
 
-        // 1. DIBUJAR LOS RECTÁNGULOS DE LOS BOTONES
         shapeRenderer.setProjectionMatrix(camera.combined);
         
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(0, 0, 0, 0.85f); // Negro ligeramente translúcido u opaco (0,0,0,1)
+        shapeRenderer.setColor(0, 0, 0, 0.85f); 
         shapeRenderer.rect(rectVolverMenu.x, rectVolverMenu.y, rectVolverMenu.width, rectVolverMenu.height);
         shapeRenderer.rect(rectSalir.x, rectSalir.y, rectSalir.width, rectSalir.height);
         shapeRenderer.end();
@@ -80,11 +77,9 @@ public class MenuDerrota {
         shapeRenderer.rect(rectSalir.x, rectSalir.y, rectSalir.width, rectSalir.height);
         shapeRenderer.end();
 
-        // 2. DIBUJAR LOS TEXTOS
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
 
-        // TÍTULO "PERDISTE"
         fuente.setColor(Color.RED);
         fuente.getData().setScale(2.5f);
         String textoPerdiste = "PERDISTE";
@@ -93,7 +88,6 @@ public class MenuDerrota {
         float yPerdiste = camera.position.y + 130;
         fuente.draw(batch, textoPerdiste, xPerdiste, yPerdiste);
 
-        // Textos de los botones
         fuente.getData().setScale(1.2f);
 
         fuente.setColor(Color.WHITE);
@@ -111,7 +105,6 @@ public class MenuDerrota {
 
         batch.end();
 
-        // 3. DETECTAR CLICS
         if (Gdx.input.justTouched()) {
             Vector3 touchPos = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);

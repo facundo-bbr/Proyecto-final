@@ -12,9 +12,8 @@ public class ProyectilMolotov extends Proyectil {
     private float destinoX, destinoY;
     private boolean haImpactado = false;
     
-    // Propiedades del fuego en el suelo
-    private float duracionFuego = 3.0f; // El fuego dura 3 segundos en el suelo
-    private float radioFuego = 70f;   // Radio de daño de la zona de fuego
+    private float duracionFuego = 3.0f; 
+    private float radioFuego = 70f;   
     private Texture texturaBotella;
     private Rectangle bounds;
 
@@ -42,34 +41,28 @@ public class ProyectilMolotov extends Proyectil {
     }
     
 
-    // Nuevo método actualizado que recibe ambas listas (enemigos y jefes)
     public void actualizarConJefes(float deltaTime, Array<Enemigos> listaEnemigos, Array<Jefe> listaJefes) {
         if (!activo) return;
 
         if (!haImpactado) {
-            // Mover la botella en vuelo
             x += velocidad.x * deltaTime;
             y += velocidad.y * deltaTime;
             bounds.setPosition(x, y);
 
-            // Comprobar si llegó al destino
             if (Vector2.dst(x, y, destinoX, destinoY) < 20f) {
                 haImpactado = true;
                 x = destinoX;
                 y = destinoY;
                 
-                // Ampliamos el bounds al tamaño exacto del área de fuego
                 bounds.set(x - radioFuego, y - radioFuego, radioFuego * 2, radioFuego * 2);
                 System.out.println("¡IMPACTO LOGRADO! Fuego activo en el suelo.");
             }
         } else {
-            // El fuego quema durante 3 segundos en el suelo
             duracionFuego -= deltaTime;
             if (duracionFuego <= 0) {
                 activo = false; 
             } else {
                 
-                // 1. Hacer daño continuo a los enemigos comunes dentro del radio de fuego
                 if (listaEnemigos != null) {
                     for (Enemigos e : listaEnemigos) {
                         if (e != null && !e.estaMuerto()) {
@@ -83,7 +76,6 @@ public class ProyectilMolotov extends Proyectil {
                     }
                 }
 
-                // 2. ¡NUEVO! Hacer daño continuo a los Jefes dentro del radio de fuego
                 if (listaJefes != null) {
                     for (Jefe jefe : listaJefes) {
                         if (jefe != null && !jefe.estaMuerto()) {
@@ -92,7 +84,7 @@ public class ProyectilMolotov extends Proyectil {
                             float centroJefeY = jefe.getY() + (jefe.getBounds().height / 2f);
                             
                             if (Vector2.dst(x, y, centroJefeX, centroJefeY) <= radioFuego) {
-                                jefe.recibirDano(dano); // Quema al jefe en área
+                                jefe.recibirDano(dano); 
                             }
                         }
                     }
@@ -102,7 +94,6 @@ public class ProyectilMolotov extends Proyectil {
         }
     }
 
-    // Método original mantenido por compatibilidad
     @Override
     public void actualizar(float deltaTime, Array<Enemigos> listaEnemigos) {
         actualizarConJefes(deltaTime, listaEnemigos, null);

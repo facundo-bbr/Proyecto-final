@@ -19,7 +19,7 @@ public abstract class Enemigos {
     protected float tiempoDesdeUltimoImpacto = 0f;
     protected static final float COOLDOWN_DANIO = 0.3f;
 
-    // Modificamos el constructor para recibir vida y velocidad iniciales
+
     public Enemigos(TextureRegion[] framesOriginales, float jugadorX, float jugadorY, int vidaInicial, float velocidadInicial) {
         this.vida = vidaInicial;
         this.vidaMaxima = vidaInicial;
@@ -43,12 +43,12 @@ public abstract class Enemigos {
     }
     
     public void actualizar(float delta) {
-        // 1. Reducir el tiempo de inmunidad al daño (cooldown de la bola de pinchos)
+
         if (tiempoDesdeUltimoImpacto > 0) {
             tiempoDesdeUltimoImpacto -= delta;
         }
         
-        // 2. Avanzar el tiempo de la animación aquí (y NO en perseguir)
+
         stateTime += delta;
     }	
 
@@ -57,16 +57,16 @@ public abstract class Enemigos {
         float centroEnemigoX = posicion.x + (frameActual.getRegionWidth() / 2f);
         float centroEnemigoY = posicion.y + (frameActual.getRegionHeight() / 2f);
 
-        // 1. Vector hacia el jugador
+    
         float dx = objetivoX - centroEnemigoX;
         float dy = objetivoY - centroEnemigoY;
         float distanciaAlJugador = (float) Math.sqrt(dx * dx + dy * dy);
 
-        // Velocidad de movimiento real aplicada en este frame
+
         float movimientoX = 0;
         float movimientoY = 0;
 
-        // Solo se acerca si está más lejos que la distancia de parada (ej: 40f)
+      
         float distanciaMinimaJugador = 40f; 
         if (distanciaAlJugador > distanciaMinimaJugador) {
             if (distanciaAlJugador > 0) {
@@ -75,14 +75,14 @@ public abstract class Enemigos {
             }
         }
 
-        // 2. FUERZA DE SEPARACIÓN ENTRE ENEMIGOS (Evita que se encimen)
+        
         float fuerzaSeparacionX = 0;
         float fuerzaSeparacionY = 0;
-        float radioSeparacion = 30f; // Distancia mínima que intentan mantener entre ellos
+        float radioSeparacion = 30f; 
 
         for (int i = 0; i < todosLosEnemigos.size; i++) {
             Enemigos otro = todosLosEnemigos.get(i);
-            if (otro == this) continue; // No compararse a sí mismo
+            if (otro == this) continue; 
 
             float otroCentroX = otro.getX() + (otro.getBounds().width / 2f);
             float otroCentroY = otro.getY() + (otro.getBounds().height / 2f);
@@ -92,21 +92,21 @@ public abstract class Enemigos {
             float distanciaEntreEnemigos = (float) Math.sqrt(distX * distX + distY * distY);
 
             if (distanciaEntreEnemigos < radioSeparacion && distanciaEntreEnemigos > 0) {
-                // Empujar en dirección opuesta al otro enemigo
+              
                 fuerzaSeparacionX += (distX / distanciaEntreEnemigos) * (radioSeparacion - distanciaEntreEnemigos);
                 fuerzaSeparacionY += (distY / distanciaEntreEnemigos) * (radioSeparacion - distanciaEntreEnemigos);
             }
         }
 
-        // Combinar movimiento hacia el jugador + fuerza de separación de los compañeros
-        float velocidadFinalX = movimientoX + (fuerzaSeparacionX * 3f); // Multiplicador de fuerza de empuje
+    
+        float velocidadFinalX = movimientoX + (fuerzaSeparacionX * 3f); 
         float velocidadFinalY = movimientoY + (fuerzaSeparacionY * 3f);
 
-        // Aplicar movimiento final multiplicado por delta
+     
         posicion.x += velocidadFinalX * delta;
         posicion.y += velocidadFinalY * delta;
 
-        // Actualizar dirección de la animación
+        
         if (dx > 0) {
             mirandoDerecha = true;
         } else if (dx < 0) {
@@ -141,12 +141,12 @@ public abstract class Enemigos {
     public void recibirDano(int cantidad) {
         if (estaMuerto()) return;
 
-        // Si está en periodo de inmunidad por un golpe reciente, ignoramos el daño
+     
         if (tiempoDesdeUltimoImpacto > 0) return;
 
         if (cantidad > 0 && vida > 0) {
             vida = Math.max(0, vida - cantidad);
-            tiempoDesdeUltimoImpacto = COOLDOWN_DANIO; // Reiniciamos el tiempo de espera
+            tiempoDesdeUltimoImpacto = COOLDOWN_DANIO; 
         }
     }
     
@@ -155,7 +155,7 @@ public abstract class Enemigos {
         float ancho = frameActual.getRegionWidth();
         float alto = frameActual.getRegionHeight();
         
-        // Debe usar posicion.x y posicion.y directamente (esquina inferior izquierda)
+    
         return new Rectangle(posicion.x, posicion.y, ancho, alto);
     }
 }

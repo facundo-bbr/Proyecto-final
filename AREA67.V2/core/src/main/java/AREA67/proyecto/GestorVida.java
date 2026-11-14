@@ -17,8 +17,8 @@ public class GestorVida {
 	public void aplicardano(int danoinflijido) {
 		if (!esInvulnerable) {
             salud -= danoinflijido;
-            esInvulnerable = true;              // Activamos la inmunidad
-            tiempoInvulnerable = 1.0f; // Reiniciamos el temporizador
+            esInvulnerable = true;              
+            tiempoInvulnerable = 1.0f; 
             
             if (salud < 0) salud = 0;
         }
@@ -37,10 +37,10 @@ public class GestorVida {
 	
 	public void actualizar(float deltaTime) {
         if (esInvulnerable) {
-            tiempoInvulnerable -= deltaTime; // ¡Esto es lo que hace que el tiempo corra!
+            tiempoInvulnerable -= deltaTime;
             
             if (tiempoInvulnerable <= 0) {
-                esInvulnerable = false; // Se acaba la inmunidad, vuelve a poder recibir daño
+                esInvulnerable = false; 
             }
         }
     }
