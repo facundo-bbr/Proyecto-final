@@ -1,6 +1,7 @@
 package AREA67.proyecto;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -12,14 +13,18 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 public class MenuDerrota {
+	
+	private Sound sonidoSeleccion;
+	
     private Rectangle rectVolverMenu;
     private Rectangle rectSalir;
     private ShapeRenderer shapeRenderer;
     private boolean activo;
     private GlyphLayout layout;
 
-    public MenuDerrota() {
+    public MenuDerrota(Sound sonidoSeleccion) {
         this.activo = false;
+        this.sonidoSeleccion=sonidoSeleccion;
         this.shapeRenderer = new ShapeRenderer();
         this.layout = new GlyphLayout();
         rectVolverMenu = new Rectangle(0, 0, 320, 50);
@@ -112,9 +117,15 @@ public class MenuDerrota {
             camera.unproject(touchPos);
 
             if (rectVolverMenu.contains(touchPos.x, touchPos.y)) {
+            	 if (sonidoSeleccion != null) {
+                     sonidoSeleccion.play(1.0f);
+                 }
                 return 1;
             }
             if (rectSalir.contains(touchPos.x, touchPos.y)) {
+            	 if (sonidoSeleccion != null) {
+                     sonidoSeleccion.play(1.0f);
+                 }
                 return 2;
             }
         }
@@ -132,6 +143,9 @@ public class MenuDerrota {
     public void dispose() {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
+        }
+        if (sonidoSeleccion != null) {
+            sonidoSeleccion.dispose();
         }
     }
 }

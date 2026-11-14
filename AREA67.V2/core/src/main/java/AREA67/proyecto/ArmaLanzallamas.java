@@ -38,7 +38,7 @@ public class ArmaLanzallamas extends Arma {
     }
 
     @Override
-    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         // Actualizamos el temporizador general del arma de la clase padre
         tiempoRestante -= deltaTime;
 
@@ -59,7 +59,7 @@ public class ArmaLanzallamas extends Arma {
     }
 
     @Override
-    public void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+    public void disparar(float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         this.jugadorXActual = jugadorX;
         this.jugadorYActual = jugadorY;
         this.proyectilesActuales = listaProyectiles;

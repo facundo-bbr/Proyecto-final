@@ -3,6 +3,7 @@ package AREA67.proyecto;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -10,50 +11,62 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 public class MenuOpciones {
-    private boolean activo;
-    private GlyphLayout layout;
+    private boolean activo = false;
     private ShapeRenderer shapeRenderer;
+    private GlyphLayout layout;
     
-    // Control de volumen (valor de 0.0f a 1.0f)
-    private float volumenMusica = 0.5f; 
-    private Music musicaFondo; // Referencia opcional a tu música de fondo principal
+    private Sound sonidoClick;
+    private Music musicaFondo;
+    private float volumenMusica = 1.0f; // 1.0 por defecto (100%)
 
-    // Botones interactivos (Menos, Más, Volver)
+    // Rectángulos para los botones
     private Rectangle rectBotonMenos;
     private Rectangle rectBotonMas;
     private Rectangle rectBotonVolver;
 
-    public MenuOpciones() {
-        this.activo = false;
-        this.layout = new GlyphLayout();
+    public MenuOpciones(Sound sonidoClick) {
+        this.sonidoClick = sonidoClick;
         this.shapeRenderer = new ShapeRenderer();
+        this.layout = new GlyphLayout();
+        
+        float anchoBoton = 80;
+        float altoBoton = 45;
+        float anchoBotonVolver = 200;
 
-        // Posiciones de los botones en la pantalla
-        this.rectBotonMenos = new Rectangle(260, 290, 60, 45);
-        this.rectBotonMas = new Rectangle(480, 290, 60, 45);
-        this.rectBotonVolver = new Rectangle(250, 180, 300, 45);
-    }
-
-    public void activar() {
-        this.activo = true;
-    }
-
-    public void desactivar() {
-        this.activo = false;
+        rectBotonMenos = new Rectangle(0, 0, anchoBoton, altoBoton);
+        rectBotonMas = new Rectangle(0, 0, anchoBoton, altoBoton);
+        rectBotonVolver = new Rectangle(0, 0, anchoBotonVolver, altoBoton);
     }
 
     public boolean isActivo() {
         return activo;
     }
 
-    /**
-     * Vincula la música del juego para que el volumen cambie en tiempo real.
-     */
+    public void activar(OrthographicCamera camera) {
+        this.activo = true;
+        
+        float anchoBoton = 80;
+        float altoBoton = 45;
+        float anchoBotonVolver = 200;
+        
+        float centroX = camera.position.x;
+        float centroY = camera.position.y;
+
+        // Posicionamos los botones centrados respecto a la cámara
+        rectBotonMenos.set(centroX - 110, centroY - 20, anchoBoton, altoBoton);
+        rectBotonMas.set(centroX + 30, centroY - 20, anchoBoton, altoBoton);
+        rectBotonVolver.set(centroX - (anchoBotonVolver / 2f), centroY - 90, anchoBotonVolver, altoBoton);
+    }
+
+    public void desactivar() {
+        this.activo = false;
+    }
+
     public void setMusicaFondo(Music musica) {
         this.musicaFondo = musica;
         if (this.musicaFondo != null) {
@@ -61,69 +74,79 @@ public class MenuOpciones {
         }
     }
 
-    public float getVolumenMusica() {
-        return volumenMusica;
+    private void actualizarVolumenMusica() {
+        if (musicaFondo != null) {
+            musicaFondo.setVolume(volumenMusica);
+        }
+        System.out.println("Volumen actualizado a: " + (int)(volumenMusica * 100) + "%");
     }
 
-    /**
-     * Maneja el renderizado y la lógica de interacción del menú de opciones.
-     * @return true si el usuario decide volver al menú anterior, false si se mantiene en opciones.
-     */
     public boolean manejarInputYRender(SpriteBatch batch, OrthographicCamera camera, BitmapFont fuente, Texture fondoMap) {
-        ScreenUtils.clear(0.1f, 0.1f, 0.15f, 1f);
+        if (!activo) return false;
+        
+        
+        camera.update();
 
+        // 0. Dibujar mapa de fondo estático
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-
-        // Dibujar mapa de fondo estático
         if (fondoMap != null) {
             batch.draw(fondoMap, 0, 0);
         }
-
         batch.end();
 
-        // Dibujar formas y botones con ShapeRenderer (estilo verde y limpio)
+        // 1. Dibujar formas y botones con ShapeRenderer
         shapeRenderer.setProjectionMatrix(camera.combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-        // Fondo de los botones (Verde brillante)
-        shapeRenderer.setColor(0.1f, 0.75f, 0.2f, 0.9f);
+        // Fondo de los botones (Rojo semitransparente acorde al nuevo estilo)
+        shapeRenderer.setColor(0.85f, 0.1f, 0.1f, 0.85f);
         shapeRenderer.rect(rectBotonMenos.x, rectBotonMenos.y, rectBotonMenos.width, rectBotonMenos.height);
         shapeRenderer.rect(rectBotonMas.x, rectBotonMas.y, rectBotonMas.width, rectBotonMas.height);
         shapeRenderer.rect(rectBotonVolver.x, rectBotonVolver.y, rectBotonVolver.width, rectBotonVolver.height);
 
         shapeRenderer.end();
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+        shapeRenderer.setColor(Color.GREEN); // Bordes verdes
+        shapeRenderer.rect(rectBotonMenos.x, rectBotonMenos.y, rectBotonMenos.width, rectBotonMenos.height);
+        shapeRenderer.rect(rectBotonMas.x, rectBotonMas.y, rectBotonMas.width, rectBotonMas.height);
+        shapeRenderer.rect(rectBotonVolver.x, rectBotonVolver.y, rectBotonVolver.width, rectBotonVolver.height);
+        shapeRenderer.end();
+
         batch.begin();
 
         // Título del Menú
-        fuente.setColor(Color.RED);
-        fuente.getData().setScale(2.2f);
+        fuente.setColor(Color.GREEN);
+        fuente.getData().setScale(2.6f);
         String titulo = "CONFIGURACION";
         layout.setText(fuente, titulo);
-        fuente.draw(batch, titulo, (camera.viewportWidth - layout.width) / 2f, 450);
+        fuente.draw(batch, titulo, camera.position.x - (layout.width / 2f), camera.position.y + 140);
 
         // Texto descriptivo de la música
         fuente.setColor(Color.WHITE);
-        fuente.getData().setScale(1.3f);
+        fuente.getData().setScale(1.5f);
         String textoVolumen = "Volumen Musica: " + (int)(volumenMusica * 100) + "%";
         layout.setText(fuente, textoVolumen);
-        fuente.draw(batch, textoVolumen, (camera.viewportWidth - layout.width) / 2f, 360);
+        fuente.draw(batch, textoVolumen, camera.position.x - (layout.width / 2f), camera.position.y + 60);
 
         // Textos dentro de los botones (-) (+) (Volver)
-        fuente.setColor(Color.RED);
+        fuente.setColor(Color.GREEN);
         
         // Botón Menos (-)
         layout.setText(fuente, "-");
-        fuente.draw(batch, "-", rectBotonMenos.x + (rectBotonMenos.width - layout.width)/2f, rectBotonMenos.y + 32f);
+        fuente.draw(batch, "-", rectBotonMenos.x + (rectBotonMenos.width - layout.width)/2f, rectBotonMenos.y + 30f);
 
         // Botón Más (+)
         layout.setText(fuente, "+");
-        fuente.draw(batch, "+", rectBotonMas.x + (rectBotonMas.width - layout.width)/2f, rectBotonMas.y + 32f);
+        fuente.draw(batch, "+", rectBotonMas.x + (rectBotonMas.width - layout.width)/2f, rectBotonMas.y + 30f);
 
         // Botón Volver
         String textoVolver = "Volver";
         layout.setText(fuente, textoVolver);
-        fuente.draw(batch, textoVolver, rectBotonVolver.x + (rectBotonVolver.width - layout.width)/2f, rectBotonVolver.y + 32f);
+        fuente.draw(batch, textoVolver, rectBotonVolver.x + (rectBotonVolver.width - layout.width)/2f, rectBotonVolver.y + 30f);
+
+        batch.end();
 
         // Control por Clic del Mouse
         if (Gdx.input.justTouched()) {
@@ -134,57 +157,35 @@ public class MenuOpciones {
             float mouseY = touchPos.y;
 
             if (rectBotonMenos.contains(mouseX, mouseY)) {
-                // Redondeamos a enteros de 10 en 10 para que baje de forma limpia (ej. 90 -> 80)
+                if (sonidoClick != null) sonidoClick.play(1.0f);
                 int porcentajeActual = Math.round(volumenMusica * 100f);
                 porcentajeActual = Math.max(0, porcentajeActual - 10);
                 volumenMusica = porcentajeActual / 100f;
                 actualizarVolumenMusica();
             }
             else if (rectBotonMas.contains(mouseX, mouseY)) {
+                if (sonidoClick != null) sonidoClick.play(1.0f);
                 int porcentajeActual = Math.round(volumenMusica * 100f);
                 porcentajeActual = Math.min(100, porcentajeActual + 10);
                 volumenMusica = porcentajeActual / 100f;
                 actualizarVolumenMusica();
-            }	
-            // Botón Volver
+            }   
             else if (rectBotonVolver.contains(mouseX, mouseY)) {
-                batch.end();
+                if (sonidoClick != null) sonidoClick.play(1.0f);
                 desactivar();
-                return true; // Indica que se sale de las opciones
+                return true; // Sale de las opciones
             }
         }
 
-        // Opcional: Control rápido con flechas del teclado
-        if (Gdx.input.isKeyJustPressed(Input.Keys.LEFT)) {
-            int porcentajeActual = Math.round(volumenMusica * 100f);
-            porcentajeActual = Math.max(0, porcentajeActual - 10);
-            volumenMusica = porcentajeActual / 100f;
-            actualizarVolumenMusica();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.RIGHT)) {
-            int porcentajeActual = Math.round(volumenMusica * 100f);
-            porcentajeActual = Math.min(100, porcentajeActual + 10);
-            volumenMusica = porcentajeActual / 100f;
-            actualizarVolumenMusica();
-        } else if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            batch.end();
-            desactivar();
-            return true;
-        }
-
-        batch.end();
         return false;
-    }
-
-    private void actualizarVolumenMusica() {
-        if (musicaFondo != null) {
-            musicaFondo.setVolume(volumenMusica);
-        }
-        System.out.println("Volumen actualizado a: " + (int)(volumenMusica * 100) + "%");
     }
 
     public void dispose() {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
+        }
+        if (sonidoClick != null) {
+            sonidoClick.dispose();
         }
     }
 }

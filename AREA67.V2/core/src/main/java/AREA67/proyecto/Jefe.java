@@ -13,6 +13,8 @@
 	    private float velocidad = 80f; // Un poco más lento pero imponente
 	    private int vida = 500;       // Mucha más vida que un enemigo normal
 	    private int dañoAtaque = 25;
+	    protected float tiempoDesdeUltimoImpacto = 0f;
+	    protected static final float COOLDOWN_DANIO = 0.3f;
 	    
 	    private Rectangle bounds;
 	    private boolean muerto = false;
@@ -31,7 +33,7 @@
 	    public Jefe(Array<TextureRegion> framesCaminar, Array<TextureRegion> framesAtaque, float x, float y) {
 	        this.x = x;
 	        this.y = y;
-	        this.bounds = new Rectangle(x, y, 64, 64); // Ajusta el tamaño según tus sprites
+	        this.bounds = new Rectangle(x, y, 96, 96); // Ajusta el tamaño según tus sprites
 	
 	        animacionCaminar = new Animation<TextureRegion>(0.15f, framesCaminar, Animation.PlayMode.LOOP);
 	        animacionAtaque = new Animation<TextureRegion>(0.1f, framesAtaque, Animation.PlayMode.NORMAL);
@@ -39,6 +41,9 @@
 	
 	    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Personaje jugador) {
 	        tiempoEstado += deltaTime;
+	        if (tiempoDesdeUltimoImpacto > 0) {
+	            tiempoDesdeUltimoImpacto -= deltaTime;
+	        }
 	        bounds.setPosition(x, y);
 	
 	        if (muerto) return;
@@ -92,11 +97,27 @@
 	            System.out.println("¡La onda expansiva golpeó al jugador!");
 	        }
 	    }
-	
 	    public void recibirDano(int cantidad) {
-	        vida -= cantidad;
-	        if (vida <= 0) {
-	            muerto = true;
+	        // Si el jefe ya está muerto, no hacemos nada
+	        if (muerto) return;
+
+	        // 1. CORRECCIÓN CLAVE: Si el tiempo es mayor a 0, significa que sigue en periodo de inmunidad (cooldown)
+	        if (tiempoDesdeUltimoImpacto > 0) {
+	            return; 
+	        }
+
+	        if (cantidad > 0) {
+	            vida = Math.max(0, vida - cantidad);
+	            
+	            // 2. CORRECCIÓN CLAVE: Activamos el cooldown fijándolo en 0.3f (para que empiece a restar en el actualizar)
+	            tiempoDesdeUltimoImpacto = COOLDOWN_DANIO; 
+	            
+	            System.out.println("¡Jefe recibió " + cantidad + " de daño! Vida restante: " + vida);
+	            
+	            if (vida <= 0) {
+	                muerto = true;
+	                System.out.println("¡El Jefe ha sido derrotado!");
+	            }
 	        }
 	    }
 	

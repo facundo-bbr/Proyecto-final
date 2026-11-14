@@ -28,7 +28,7 @@
 	    }
 	
 	    @Override
-	    public void actualizar(float deltaTime, Array<enemigos> listaEnemigos) {
+	    public void actualizar(float deltaTime, Array<Enemigos> listaEnemigos) {
 	        if (!activo) return;
 	
 	        x += velocidad.x * deltaTime;

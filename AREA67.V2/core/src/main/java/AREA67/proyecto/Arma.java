@@ -16,7 +16,7 @@ public abstract class Arma {
         this.tiempoRestante = cadenciaAtaque;
     }
 
-    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         tiempoRestante -= deltaTime;
 
         if (tiempoRestante <= 0) {
@@ -26,7 +26,7 @@ public abstract class Arma {
     }
 
     // Ahora acepta cualquier proyectil que herede de Proyectil
-    public abstract void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles);
+    public abstract void disparar(float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles);
 
     // Getters y setters...
     public String getNombre() { return nombre; }

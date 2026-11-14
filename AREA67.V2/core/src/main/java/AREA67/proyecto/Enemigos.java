@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-public abstract class enemigos {
+public abstract class Enemigos {
     protected Vector2 posicion;
     protected float velocidad;
     protected int vida;
@@ -20,7 +20,7 @@ public abstract class enemigos {
     protected static final float COOLDOWN_DANIO = 0.3f;
 
     // Modificamos el constructor para recibir vida y velocidad iniciales
-    public enemigos(TextureRegion[] framesOriginales, float jugadorX, float jugadorY, int vidaInicial, float velocidadInicial) {
+    public Enemigos(TextureRegion[] framesOriginales, float jugadorX, float jugadorY, int vidaInicial, float velocidadInicial) {
         this.vida = vidaInicial;
         this.vidaMaxima = vidaInicial;
         this.velocidad = velocidadInicial;
@@ -52,7 +52,7 @@ public abstract class enemigos {
         stateTime += delta;
     }	
 
-    public void perseguir(float objetivoX, float objetivoY, float delta, com.badlogic.gdx.utils.Array<enemigos> todosLosEnemigos) {
+    public void perseguir(float objetivoX, float objetivoY, float delta, com.badlogic.gdx.utils.Array<Enemigos> todosLosEnemigos) {
         TextureRegion frameActual = animacion.getKeyFrame(stateTime, true);
         float centroEnemigoX = posicion.x + (frameActual.getRegionWidth() / 2f);
         float centroEnemigoY = posicion.y + (frameActual.getRegionHeight() / 2f);
@@ -81,7 +81,7 @@ public abstract class enemigos {
         float radioSeparacion = 30f; // Distancia mínima que intentan mantener entre ellos
 
         for (int i = 0; i < todosLosEnemigos.size; i++) {
-            enemigos otro = todosLosEnemigos.get(i);
+            Enemigos otro = todosLosEnemigos.get(i);
             if (otro == this) continue; // No compararse a sí mismo
 
             float otroCentroX = otro.getX() + (otro.getBounds().width / 2f);

@@ -2,6 +2,7 @@ package AREA67.proyecto;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -18,12 +19,15 @@ public class MenuPrincipal {
     private GlyphLayout layout;
     private ShapeRenderer shapeRenderer;
     
+    private Sound sonidoSeleccion;
+    
     private Rectangle rectPlay;
     private Rectangle rectConfig;
     private Rectangle rectSalir;
 
-    public MenuPrincipal() {
+    public MenuPrincipal(Sound sonidoSeleccion) {
         this.enMenuPrincipal = false;
+        this.sonidoSeleccion=sonidoSeleccion;
         this.layout = new GlyphLayout();
         this.shapeRenderer = new ShapeRenderer();
         
@@ -118,12 +122,21 @@ public class MenuPrincipal {
                 float mouseY = touchPos.y;
 
                 if (rectPlay.contains(mouseX, mouseY)) {
+                	 if (sonidoSeleccion != null) {
+                         sonidoSeleccion.play(1.0f);
+                     }
                     batch.end();
                     return 1; // Iniciar Juego
                 } else if (rectConfig.contains(mouseX, mouseY)) {
+                	 if (sonidoSeleccion != null) {
+                         sonidoSeleccion.play(1.0f);
+                     }
                     batch.end();
                     return 2; // Abrir Opciones
                 } else if (rectSalir.contains(mouseX, mouseY)) {
+                	 if (sonidoSeleccion != null) {
+                         sonidoSeleccion.play(1.0f);
+                     }
                     Gdx.app.exit();
                 }
             }
@@ -136,6 +149,9 @@ public class MenuPrincipal {
     public void dispose() {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
+        }
+        if (sonidoSeleccion != null) {
+            sonidoSeleccion.dispose();
         }
     }
 }

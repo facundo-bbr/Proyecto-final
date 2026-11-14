@@ -24,6 +24,8 @@ public class Principal extends ApplicationAdapter {
     private boolean juegoIniciado = false;
     private BitmapFont fuenteMenu;
     
+    private float temporizadorTilin = 0f;
+    
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private Texture image;
@@ -55,6 +57,7 @@ public class Principal extends ApplicationAdapter {
     private Texture texturaCorazon;
     private Texture texturaBotella;
     private Texture texturaLanzallamas;
+    private Texture texturaFusil;
 
     // Entidad Jugador
     private Personaje jugador;
@@ -62,7 +65,7 @@ public class Principal extends ApplicationAdapter {
     //Musica y Sonidos
     private Music musicaDeFondo;
     private Sound sonidoSubidaDeNivel;
-    private Sound sonidoElegirOpcion;
+    private Sound sonidoSeleccion;
     // Menús
     private MenuMejora menuMejora;
     private MenuDerrota menuDerrota;
@@ -73,11 +76,12 @@ public class Principal extends ApplicationAdapter {
     // Listas del juego
     private Array<Jefe> listaJefes= new Array<>();;
     private Array<Proyectil> listaProyectiles = new Array<>();
-    private Array<enemigos> listaEnemigos = new Array<>();
+    private Array<Enemigos> listaEnemigos = new Array<>();
     private Array<ObjetoSuelo> listaObjetosSuelo = new Array<>();
     private Array<Obstaculos> listaObstaculos = new Array<>();
 
     // Recursos Enemigo
+    private Texture texturaTilin;
     private Texture sheetZombieRojo;
     private Texture sheetZombieVerde;
     private Texture sheetEsqueleto;
@@ -90,6 +94,7 @@ public class Principal extends ApplicationAdapter {
     private TextureRegion[] framesZombieVerde;
     private TextureRegion[] framesZombieRojo;
     private TextureRegion[] framesEsqueleto;
+    private TextureRegion[] framesTilin;
     private float temporizadorSpawneo;
     private float temporizadorObstaculo = 0f;
     
@@ -102,7 +107,6 @@ public class Principal extends ApplicationAdapter {
         
         // 1. Cargar la textura y configurar el wrap mode para repetición infinita
         image = new Texture("mapa.jpg");
-        image.setWrap(Texture.TextureWrap.Repeat, Texture.TextureWrap.Repeat);
 
         manager = new AssetManager();
         camera = new OrthographicCamera();
@@ -134,21 +138,23 @@ public class Principal extends ApplicationAdapter {
         texturaGemaAzul = new Texture("xpazul.png");
         texturaImancito = new Texture("Imancito.png");
         sheetCaminarJefe = new Texture("jefearea67.png");
-        sheetAtaqueJefe = sheetCaminarJefe;
+        sheetAtaqueJefe = new Texture ("JefeAtacando.png");
         texturaBotella = new Texture ("Botella.png");
+        texturaTilin= new Texture ("tilin.png");
+        texturaFusil=new Texture ("Fusil.png");
 
         // Instancia del Personaje
-        jugador = new Personaje(400, 300, texturaBala);
+        jugador = new Personaje(2048, 2048, texturaBala);
         
         //Musica y Sonido
         musicaDeFondo = Gdx.audio.newMusic(Gdx.files.internal("Musica de fondo 1.mp3"));
         musicaDeFondo.setLooping(true);
-        musicaDeFondo.setVolume(0.5f);
+        musicaDeFondo.setVolume(1f);
         musicaDeFondo.play();
 
         // Efectos de sonido
         sonidoSubidaDeNivel = Gdx.audio.newSound(Gdx.files.internal("Sonido de subida de nivel.ogg"));
-        sonidoElegirOpcion = Gdx.audio.newSound(Gdx.files.internal("seleccionar opcion.ogg"));
+        sonidoSeleccion = Gdx.audio.newSound(Gdx.files.internal("seleccionar opcion.ogg"));
          
         
 
@@ -160,96 +166,104 @@ public class Principal extends ApplicationAdapter {
         framesZombieVerde = cortarSprite(sheetZombieVerde, 60, 60);
         framesZombieRojo = cortarSprite(sheetZombieRojo, 60, 60);
         framesEsqueleto = cortarSprite(sheetEsqueleto, 60, 60);
-        //arrCaminar = cortarSprite(sheetCaminarJefe, 96, 96);
-        //arrAtaque = cortarSprite(sheetAtaqueJefe, 96, 96);
-        TextureRegion[] arrFramesProvisionales = cortarSprite(sheetCaminarJefe, 96, 96);
+        arrCaminar = cortarSprite(sheetCaminarJefe, 96, 96);
+        arrAtaque = cortarSprite(sheetAtaqueJefe, 96, 96);
+        framesTilin = cortarSprite(texturaTilin,32,32);
         
-        framesJefeCaminar = new Array<>(arrFramesProvisionales);
-        framesJefeAtaque = new Array<>(arrFramesProvisionales);
+        framesJefeCaminar = new Array<>(arrCaminar);
+        framesJefeAtaque = new Array<>(arrAtaque);
 
         temporizadorSpawneo = 0f;
         
         fuenteMenu = new BitmapFont();
         fuenteMenu.getData().setScale(2.0f);
         
-        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito,texturaBotella, texturaLanzallamas);
-        menuDerrota = new MenuDerrota();
-        menuPrincipal = new MenuPrincipal();
-        menuPausa = new MenuPausa();
-        menuOpciones = new MenuOpciones();
+        menuMejora = new MenuMejora(texturaCuchillo, texturaPincho, texturaBolafuego, texturaColgala, texturaRecatate, texturaEscudovich, texturaCorazonCeda, texturaCorazon, texturaImancito,texturaBotella, texturaLanzallamas,texturaFusil,sonidoSubidaDeNivel,sonidoSeleccion);
+        menuDerrota = new MenuDerrota(sonidoSeleccion);
+        menuPrincipal = new MenuPrincipal(sonidoSeleccion);
+        menuPausa = new MenuPausa(sonidoSeleccion);
+        menuOpciones = new MenuOpciones(sonidoSeleccion);
         
         // Generar obstáculos iniciales distribuidos libremente alrededor del centro
         int cantidadObstaculos = 15;
         for (int i = 0; i < cantidadObstaculos; i++) {
-            float posX = com.badlogic.gdx.math.MathUtils.random(-800, 800);
-            float posY = com.badlogic.gdx.math.MathUtils.random(-800, 800);
+            float posX = com.badlogic.gdx.math.MathUtils.random(50f, 4046f); // Margen de 50px por los bordes
+            float posY = com.badlogic.gdx.math.MathUtils.random(50f, 4046f);
             listaObstaculos.add(new Obstaculos(posX, posY, texturaObstaculo, 250));
         }
     }
 
     @Override
-    public void render() {
-    	float deltaTime = Gdx.graphics.getDeltaTime();
-        Texture texturaAElegir = texturaGemaVerde;
-        boolean juegoPausado = menuMejora.isActivo() || menuPausa.isActivo() || menuDerrota.isActivo() || menuOpciones.isActivo() || !juegoIniciado;        if (menuOpciones.isActivo()) {
-            boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
-            if (salirOpciones) {
-                // Vuelve al flujo normal
-            }
-            return;
-        }
-        if (menuOpciones.isActivo()) {
-            menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
-            return;
-        }
-        if (menuDerrota.isActivo()) {
-            int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image);
-            if (accionMenu == 1) {
-                reiniciarJuego();
-                menuDerrota.desactivar();
-            } else if (accionMenu == 2) {
-                Gdx.app.exit();
-            }
-            return;
-        }
-        if (!juegoIniciado) {
-            int accionMenuP = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
-            if (accionMenuP == 1) {
-                juegoIniciado = true; // Arranca el juego
-            } else if (accionMenuP == 2) {
-                menuOpciones.activar(); // ¡Abre el menú de configuración/opciones!
-            }
-            return; 
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && juegoIniciado && !jugador.estaMuerto() && !menuMejora.isActivo()) {
-            if (menuPausa.isActivo()) {
-                menuPausa.desactivar();
-            } else {
-                menuPausa.activar(camera);
-            }
-        }
-        
-        if (menuPausa.isActivo()) {
-            int accionPausa = menuPausa.manejarInputYRender(batch, camera, fuenteMenu, image);
-            if (accionPausa == 1) {
-                // Continuar juego
-            } else if (accionPausa == 2) {
-                reiniciarJuego();
-                juegoIniciado = false;
-                menuPausa.desactivar();
-            } else if (accionPausa == 3) {
-                Gdx.app.exit();
-            }
-            return; 
-        }
 
-        if (jugador.estaMuerto()) {
-            if (!menuDerrota.isActivo()) {
-                System.out.println("¡Game Over!");
-                menuDerrota.activar(camera);
-            }
-            return;
-        }
+	    public void render() {
+	    float deltaTime = Gdx.graphics.getDeltaTime();
+	    Texture texturaAElegir = texturaGemaVerde;
+	    boolean juegoPausado = menuMejora.isActivo() || menuPausa.isActivo() || menuDerrota.isActivo() || menuOpciones.isActivo() || !juegoIniciado; if (menuOpciones.isActivo()) {
+	    if (menuOpciones.isActivo()) {
+	    	menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
+	    	menuOpciones.setMusicaFondo(musicaDeFondo);
+	    return;
+	    }
+	    boolean salirOpciones = menuOpciones.manejarInputYRender(batch, camera, fuenteMenu, image);
+	    if (salirOpciones) {
+	    // Vuelve al flujo normal
+	    }
+	    	return;
+	    }
+	    if (menuDerrota.isActivo()) {
+	    	int accionMenu = menuDerrota.manejarInputYRender(batch, camera, fuenteMenu, image);
+	    	if (accionMenu == 1) {
+	    		reiniciarJuego();
+	    		menuDerrota.desactivar();
+	    		} else if (accionMenu == 2) {
+	    			Gdx.app.exit();
+	    		}
+	    	return;
+	    	}
+	    if (!juegoIniciado) {
+	    	int accionMenuP = menuPrincipal.manejarMenu(batch, camera, fuenteMenu, image);
+	    	if (accionMenuP == 1) {
+	    		juegoIniciado = true; // Arranca el juego
+	    	} else if (accionMenuP == 2) {
+	    		menuOpciones.activar(camera); // ¡Abre el menú de configuración/opciones!
+	    }
+	    	return;
+	    }
+	    if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) && juegoIniciado && !jugador.estaMuerto() && !menuMejora.isActivo()) {
+	    		if (menuPausa.isActivo()) {
+	    			menuPausa.desactivar();
+	    	} else {
+	    		menuPausa.activar(camera);
+	    	}
+	    }
+	
+	    if (menuPausa.isActivo()) {
+	    	int accionPausa = menuPausa.manejarInputYRender(batch, camera, fuenteMenu, image);
+	    	if (accionPausa == 1) {
+	    // Continuar juego
+	    	} else if (accionPausa == 2) {
+	    		reiniciarJuego();
+	    		juegoIniciado = false;
+	    		menuPausa.desactivar();
+	    	} else if (accionPausa == 3) {
+	    		Gdx.app.exit();
+	    	} else if (accionPausa == 4){
+	    		menuPausa.desactivar();
+	    		menuOpciones.activar(camera);
+	    		menuPausa.activar(camera);
+	    }
+	    	return;
+	    }
+	
+	
+	
+	    if (jugador.estaMuerto()) {
+	    	if (!menuDerrota.isActivo()) {
+	    		System.out.println("¡Game Over!");
+	    		menuDerrota.activar(camera);
+    	}
+    	return;
+    	} 
 
         float centroPjX = jugador.getCentroX();
         float centroPjY = jugador.getCentroY();
@@ -262,55 +276,106 @@ public class Principal extends ApplicationAdapter {
         	if (!juegoPausado){
             tiempoJuego += deltaTime;
             
-            if (tiempoJuego - tiempoUltimoJefe >= intervaloJefe) {
-                spawnearJefe();
-                tiempoUltimoJefe = tiempoJuego; // Reiniciamos el conteo para los próximos 2 minutos
+            if (tiempoJuego >= 600f) {
+                // Limpiamos opcionalmente el spawn normal si deseas que dejen de aparecer los demás
+                // (opcional: listaEnemigos.clear(); si quieres que la pantalla se limpie al llegar a los 10 min)
+
+                temporizadorTilin += deltaTime;
+                if (temporizadorTilin > 1.0f) { // Cada cuánto tiempo aparece Tilin (ej: 1 segundo)
+                    float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
+                    float distanciaSpawn = 700f; // Fuera de la vista de la cámara
+                    float spawnX = centroPjX + MathUtils.cos(anguloRandom) * distanciaSpawn;
+                    float spawnY = centroPjY + MathUtils.sin(anguloRandom) * distanciaSpawn;
+
+                    // Asegurar que Tilin spawnee dentro de los límites del mapa 4096x4096
+                    spawnX = MathUtils.clamp(spawnX, 50f, 4046f);
+                    spawnY = MathUtils.clamp(spawnY, 50f, 4046f);
+
+                     listaEnemigos.add(new Tilin(framesTilin, spawnX, spawnY));
+                     
+                     
+
+                     listaJefes.clear();
+
+                    temporizadorTilin = 0f;
+                }
+
+            } else {
+                // =========================================================================
+                // FLUJO NORMAL (Antes de los 10 minutos)
+                // =========================================================================
+                
+                // 1. Spawneo de Jefes cada 30 segundos
+                if (tiempoJuego - tiempoUltimoJefe >= intervaloJefe) {
+                    spawnearJefe();
+                    tiempoUltimoJefe = tiempoJuego; 
+                }
+
+                // 2. Spawneo de Zombies y Esqueletos
+                temporizadorSpawneo += deltaTime;
+                if (temporizadorSpawneo > 1.5f) {
+                    int tipoEnemigo = com.badlogic.gdx.math.MathUtils.random(0, 2);
+                    
+                    float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
+                    float distanciaSpawn = 600f; 
+                    float spawnX = centroPjX + MathUtils.cos(anguloRandom) * distanciaSpawn;
+                    float spawnY = centroPjY + MathUtils.sin(anguloRandom) * distanciaSpawn;
+
+                    // Limitar al mapa 4096
+                    spawnX = MathUtils.clamp(spawnX, 50f, 4046f);
+                    spawnY = MathUtils.clamp(spawnY, 50f, 4046f);
+
+                    if (tipoEnemigo == 0) {
+                        listaEnemigos.add(new ZombieVerde(framesZombieVerde, spawnX, spawnY));
+                    } else if (tipoEnemigo == 1) {
+                        listaEnemigos.add(new ZombieRojo(framesZombieRojo, spawnX, spawnY));
+                    } else {
+                        listaEnemigos.add(new Esqueleto(framesEsqueleto, spawnX, spawnY));
+                    }
+
+                    temporizadorSpawneo = 0f;
+                }
+
+                // 3. Spawneo de Obstáculos (Barriles) cada 30 segundos
+                temporizadorObstaculo += deltaTime;
+                if (temporizadorObstaculo >= 30.0f) {
+                    float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
+                    float distanciaCercana = com.badlogic.gdx.math.MathUtils.random(200f, 1000f);
+                    
+                    float obstaculoX = centroPjX + MathUtils.cos(anguloRandom) * distanciaCercana;
+                    float obstaculoY = centroPjY + MathUtils.sin(anguloRandom) * distanciaCercana;
+
+                    obstaculoX = MathUtils.clamp(obstaculoX, 0f, 4096f - 50f);
+                    obstaculoY = MathUtils.clamp(obstaculoY, 0f, 4096f - 50f);
+
+                    listaObstaculos.add(new Obstaculos(obstaculoX, obstaculoY, texturaObstaculo, 250));
+                    temporizadorObstaculo = 0f;
+                }
             }
 
             // Actualizar movimiento, armas y cooldowns del jugador (movimiento libre)
-            jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles);
+            jugador.actualizar(deltaTime, listaEnemigos, listaProyectiles,listaJefes);
+            float minX = 0f;
+            float minY = 0f;
+            // 4096 menos el tamaño/ancho de la hitbox o sprite del jugador para que no lo atraviese
+            float maxX = 4096f - jugador.getAncho();
+            float maxY = 4096f - jugador.getAlto();
 
-            // Spawneo de enemigos en un radio dinámico alrededor de la cámara/jugador
-            temporizadorSpawneo += deltaTime;
-            if (temporizadorSpawneo > 1.5f) {
-                int tipoEnemigo = com.badlogic.gdx.math.MathUtils.random(0, 2);
-                
-                float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
-                float distanciaSpawn = 600f; 
-                float spawnX = centroPjX + MathUtils.cos(anguloRandom) * distanciaSpawn;
-                float spawnY = centroPjY + MathUtils.sin(anguloRandom) * distanciaSpawn;
+            jugador.setX(MathUtils.clamp(jugador.getX(), minX, maxX));
+            jugador.setY(MathUtils.clamp(jugador.getY(), minY, maxY));
 
-                if (tipoEnemigo == 0) {
-                    listaEnemigos.add(new ZombieVerde(framesZombieVerde, spawnX, spawnY));
-                } else if (tipoEnemigo == 1) {
-                    listaEnemigos.add(new ZombieRojo(framesZombieRojo, spawnX, spawnY));
-                } else {
-                    listaEnemigos.add(new Esqueleto(framesEsqueleto, spawnX, spawnY));
-                }
-
-                temporizadorSpawneo = 0f;
-            }
-         // --- NUEVO: Spawneo de barriles/obstáculos cada 30 segundos cerca del jugador ---
-            temporizadorObstaculo += deltaTime;
-            if (temporizadorObstaculo >= 30.0f) {
-                // Generar en un radio cercano (por ejemplo, entre 200 y 400 píxeles de distancia del jugador)
-                float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);
-                float distanciaCercana = com.badlogic.gdx.math.MathUtils.random(200f, 400f);
-                
-                float obstaculoX = centroPjX + MathUtils.cos(anguloRandom) * distanciaCercana;
-                float obstaculoY = centroPjY + MathUtils.sin(anguloRandom) * distanciaCercana;
-
-                // Añadir a la lista con su vida inicial (ej: 250)
-                listaObstaculos.add(new Obstaculos(obstaculoX, obstaculoY, texturaObstaculo, 250));
-
-                temporizadorObstaculo = 0f; // Reiniciar el temporizador a 0
-            }
+  
 
          // Colisiones: Proyectiles vs Enemigos y Obstáculos
             for (int i = listaProyectiles.size - 1; i >= 0; i--) {
                 Proyectil p = listaProyectiles.get(i);
-                p.actualizar(deltaTime, listaEnemigos);
-
+                if (p instanceof ProyectilMolotov) {
+                    ((ProyectilMolotov) p).actualizarConJefes(deltaTime, listaEnemigos, listaJefes);
+                } else if (p instanceof Cuchillo) {
+                    ((Cuchillo) p).actualizarConJefes(deltaTime, listaEnemigos, listaJefes);
+                } else {
+                    p.actualizar(deltaTime, listaEnemigos);
+                }
                 if (!p.isActivo()) {
                     listaProyectiles.removeIndex(i);
                     continue;
@@ -320,7 +385,7 @@ public class Principal extends ApplicationAdapter {
 
                 // 1. Colisión contra Enemigos
                 for (int j = listaEnemigos.size - 1; j >= 0; j--) {
-                    enemigos enemigo = listaEnemigos.get(j);
+                    Enemigos enemigo = listaEnemigos.get(j);
                     if (p.getBounds().overlaps(enemigo.getBounds())) {
                         if (!(p instanceof ProyectilMolotov)) {
                             enemigo.recibirDano(p.getDano());
@@ -384,7 +449,7 @@ public class Principal extends ApplicationAdapter {
             
             // Colisiones: Persecución y Ataque del Enemigo al Jugador
             for (int i = listaEnemigos.size - 1; i >= 0; i--) {
-                enemigos enemigo = listaEnemigos.get(i);
+                Enemigos enemigo = listaEnemigos.get(i);
                 enemigo.actualizar(deltaTime);
                 enemigo.perseguir(centroPjX, centroPjY, deltaTime, listaEnemigos); 
 
@@ -419,10 +484,17 @@ public class Principal extends ApplicationAdapter {
                 float centroEnemigoX = enemigo.getX() + (enemigo.getBounds().width / 2f);
                 float centroEnemigoY = enemigo.getY() + (enemigo.getBounds().height / 2f);
                 
+                if (enemigo instanceof Tilin) { // <--- Si tu clase se llama Tilin
+                    if (Vector2.dst(centroPjX, centroPjY, centroEnemigoX, centroEnemigoY) < 50f) {
+                        jugador.recibirDano(1000); // ¡Le quita 1000 de vida al tocarlo!
+                    }
+                }else {
+                
                 if (Vector2.dst(centroPjX, centroPjY, centroEnemigoX, centroEnemigoY) < 45f) {
                     jugador.recibirDano(10);
                 }
             }
+                }
             
             for (int k = listaObstaculos.size - 1; k >= 0; k--) {
                 Obstaculos obstaculo = listaObstaculos.get(k);
@@ -490,9 +562,14 @@ public class Principal extends ApplicationAdapter {
         // =========================================================================
         // CÁMARA E INFINITO (Sin límites ni clamp, siguiendo libremente al jugador)
         // =========================================================================
-        camera.position.x = jugador.getCentroX();
-        camera.position.y = jugador.getCentroY();
-        camera.update();
+        	float mitadViewportW = camera.viewportWidth / 2f;
+            float mitadViewportH = camera.viewportHeight / 2f;
+
+            // La cámara sigue al jugador, pero se limita exactamente al borde del mapa de 4096
+            camera.position.x = MathUtils.clamp(jugador.getCentroX(), mitadViewportW, 4096f - mitadViewportW);
+            camera.position.y = MathUtils.clamp(jugador.getCentroY(), mitadViewportH, 4096f - mitadViewportH);
+            
+            camera.update();
 
         // =========================================================================
         // 4. RENDERIZADO (SPRITE BATCH Y MAPA INFINITO EN BUCLE)
@@ -500,7 +577,7 @@ public class Principal extends ApplicationAdapter {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-
+        batch.draw(image, 0, 0, 4096,4096 );
         // A. Fondo del mapa infinito en bucle (Tiling)
         float anchoTextura = image.getWidth();
         float altoTextura = image.getHeight();
@@ -513,7 +590,7 @@ public class Principal extends ApplicationAdapter {
 
         for (float x = inicioX; x < camIzq + camera.viewportWidth + anchoTextura; x += anchoTextura) {
             for (float y = inicioY; y < camAbajo + camera.viewportHeight + altoTextura; y += altoTextura) {
-                batch.draw(image, x, y);
+                //batch.draw(image, x, y);
             }
         }
 
@@ -567,7 +644,7 @@ public class Principal extends ApplicationAdapter {
         }
 
         // D. Enemigos, Proyectiles y Jugador
-        for (enemigos enemigo : listaEnemigos) {
+        for (Enemigos enemigo : listaEnemigos) {
             enemigo.dibujar(batch);
         }
         if (listaJefes != null) {
@@ -695,8 +772,8 @@ public class Principal extends ApplicationAdapter {
         if (sonidoSubidaDeNivel != null) {
             sonidoSubidaDeNivel.dispose();
         }
-        if (sonidoElegirOpcion != null) {
-            sonidoElegirOpcion.dispose();
+        if (sonidoSeleccion != null) {
+        	sonidoSeleccion.dispose();
         }
         
     }
@@ -735,9 +812,8 @@ public class Principal extends ApplicationAdapter {
         camera.position.set(camera.viewportWidth / 2f, camera.viewportHeight / 2f, 0);
         camera.update();
 
-        float centroX = camera.viewportWidth / 2f;
-        float centroY = camera.viewportHeight / 2f;
-        jugador = new Personaje(centroX, centroY, texturaBala); 
+       
+        jugador = new Personaje(2048, 2048, texturaBala); 
 
         tiempoJuego = 0f; 
         temporizadorSpawneo = 0f;

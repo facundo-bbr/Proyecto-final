@@ -25,7 +25,7 @@ public class BolaPinchos extends Arma {
     }
 
     @Override
-    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+    public void actualizar(float deltaTime, float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         // Actualizamos el temporizador del ciclo
         temporizadorCiclo += deltaTime;
 
@@ -42,7 +42,7 @@ public class BolaPinchos extends Arma {
             if (listaEnemigos != null) {
                 Rectangle boundsBola = getBounds();
                 for (int i = 0; i < listaEnemigos.size; i++) {
-                    enemigos enemigo = listaEnemigos.get(i);
+                    Enemigos enemigo = listaEnemigos.get(i);
                     if (boundsBola.overlaps(enemigo.getBounds())) {
                         enemigo.recibirDano(dano);
                     }
@@ -81,7 +81,7 @@ public class BolaPinchos extends Arma {
     }
 
     @Override
-    public void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+    public void disparar(float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         // No aplica para armas de órbita
     }
 }

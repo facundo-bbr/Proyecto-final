@@ -23,7 +23,7 @@ public class Fusil extends Arma {
     }
 
     @Override
-    public void disparar(float jugadorX, float jugadorY, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+    public void disparar(float jugadorX, float jugadorY, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
         // Creamos un punto objetivo distante basado en la última dirección guardada
         Vector2 posicionObjetivo = new Vector2(jugadorX, jugadorY).add(new Vector2(direccionActual).scl(1000f));
 

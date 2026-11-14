@@ -2,6 +2,7 @@ package AREA67.proyecto;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -20,6 +21,9 @@ public class MenuMejora {
     private GlyphLayout layout = new GlyphLayout();
     private ShapeRenderer shapeRenderer;
     
+    private Sound sonidoLevelUp;
+    private Sound sonidoSeleccion;
+    
     // Rectángulos de las 3 tarjetas para la interfaz y clics del mouse
     private Rectangle[] rectTarjetas = new Rectangle[3];
     
@@ -35,8 +39,11 @@ public class MenuMejora {
     private Texture texturaImancito;
     private Texture texturaBotella;
     private Texture texturaLanzallamas;
+    private Texture texturaFusil;
 
-    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,Texture texturaImancito,Texture texturaBotella, Texture texturaLanzallamas) {
+    public MenuMejora(Texture texturaCuchillo, Texture texturaPincho, Texture texturaBolafuego, Texture texturaColgala,
+    				  Texture texturaRecatate,Texture texturaEscudovich,Texture texturaCorazonCeda,Texture texturaCorazon,
+    				  Texture texturaImancito,Texture texturaBotella, Texture texturaLanzallamas,Texture texturaFusil,Sound sonidoLevelUp,Sound sonidoSeleccion) {
         this.texturaCuchillo = texturaCuchillo;
         this.texturaPincho = texturaPincho;
         this.texturaBolafuego = texturaBolafuego;
@@ -48,6 +55,9 @@ public class MenuMejora {
         this.texturaImancito= texturaImancito;
         this.texturaBotella = texturaBotella;
         this.texturaLanzallamas = texturaLanzallamas;
+        this.texturaFusil=texturaFusil;
+        this.sonidoLevelUp = sonidoLevelUp;
+        this.sonidoSeleccion=sonidoSeleccion;
         this.shapeRenderer = new ShapeRenderer();
         
         for (int i = 0; i < 3; i++) {
@@ -58,6 +68,9 @@ public class MenuMejora {
     public void abrir() {
         this.activo = true;
         generarOpcionesAleatorias();
+        if (sonidoLevelUp != null) {
+            sonidoLevelUp.play(1.0f); // Volumen 1.0 (puedes ajustarlo, ej. 0.5f)
+        }
     }
 
     public void cerrar() {
@@ -70,16 +83,17 @@ public class MenuMejora {
 
     private void generarOpcionesAleatorias() {
         String[] poolDescripciones = {
-            "Recatate (+20% Daño de Armas)",          // Tipo 0
+            "Recatate (+10 Daño de Armas)",          // Tipo 0
             "Curar Vida Completa",                  // Tipo 1
-            "Mentira Colgala(+15% Velocidad de Movimiento)", // Tipo 2
+            "Mentira Colgala(+15 Velocidad de Movimiento)", // Tipo 2
             "Aumentar Rango de Recoleccion",        // Tipo 3
             "Cuchillos",        // Tipo 4
             "Bola de Pinchos",              // Tipo 5
             "Lanzallamas",                   // Tipo 6
             "Escudovich(Reducir Daño Recibido un 10%)",
             "Corazon de Ceda (+20 HP max)",
-            "La peligroza"
+            "La peligroza",
+            "Fusil"
         };
 
         com.badlogic.gdx.utils.Array<Integer> indicesDisponibles = new com.badlogic.gdx.utils.Array<>();
@@ -107,6 +121,7 @@ public class MenuMejora {
             case 8: return texturaCorazonCeda;
             default: return texturaImancito; 
             case 9: return texturaBotella;
+            case 10: return texturaFusil;
         }
     }
 
@@ -117,8 +132,7 @@ public class MenuMejora {
         camera.update();
         float camX = camera.position.x;
         float camY = camera.position.y;
-        float viewW = camera.viewportWidth;
-        float viewH = camera.viewportHeight;
+       
 
         // 0. DIBUJAR EL FONDO PRIMERO (Para que nunca quede en negro)
         batch.setProjectionMatrix(camera.combined);
@@ -223,6 +237,9 @@ public class MenuMejora {
         }
 
         if (seleccion != -1) {
+        	if (sonidoSeleccion != null) {
+                sonidoSeleccion.play(1.0f);
+            }
             aplicarMejora(seleccion, jugador);
             cerrar();
         }
@@ -351,6 +368,30 @@ public class MenuMejora {
             	    }
             	}
             	break;
+            case 10:
+            	Fusil rifleExistente = null;
+                for (Arma arma : jugador.getArsenal()) { 
+                    if (arma instanceof Fusil) {
+                        rifleExistente = (Fusil) arma;
+                        break;
+                    }
+                }
+
+                // 2. Si ya lo tiene, aplica la mejora progresiva (daño / cooldown / cadencia)
+                if (rifleExistente != null) {
+                    rifleExistente.aplicarMejoraProgresiva();
+                    System.out.println("¡Rifle mejorado de nivel!");
+                } else {
+                    // 3. Si no lo tiene, lo equipa en el primer espacio libre del arsenal
+                    for (int i = 0; i < jugador.getArsenal().length; i++) {
+                        if (jugador.getArsenal()[i] == null) {
+                            jugador.getArsenal()[i] = new Fusil(texturaFusil); // Reemplaza con la textura o parámetros de tu rifle
+                            System.out.println("¡Nuevo Rifle añadido al arsenal!");
+                            break;
+                        }
+                    }
+                }
+                break;
         }
 
         jugador.getGestorExperiencia().consumirNivelPendiente();
@@ -359,6 +400,12 @@ public class MenuMejora {
     public void dispose() {
         if (shapeRenderer != null) {
             shapeRenderer.dispose();
+        }
+        if (sonidoLevelUp != null) {
+            sonidoLevelUp.dispose();
+        }
+        if (sonidoSeleccion != null) { // <-- Liberar memoria
+            sonidoSeleccion.dispose();
         }
     }
 }

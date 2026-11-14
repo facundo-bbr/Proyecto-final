@@ -16,7 +16,7 @@ public abstract class Proyectil {
         this.activo = true;
     }
 
-    public abstract void actualizar(float deltaTime, Array<enemigos> listaEnemigos);
+    public abstract void actualizar(float deltaTime, Array<Enemigos> listaEnemigos);
     public abstract void dibujar(SpriteBatch batch);
     public abstract Rectangle getBounds();
 

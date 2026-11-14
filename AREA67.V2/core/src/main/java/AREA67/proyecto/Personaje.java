@@ -34,7 +34,8 @@
 	    Arma[] arsenal = new Arma[5];
 	    private float multiplicadorDañoRecibido = 1.0f;
 	    private int contadorReducionDano = 0;
-	
+	    
+	    
 	    // Constructor predeterminado (compatibilidad)
 	    public Personaje() {
 	        this(400, 300, null);
@@ -46,6 +47,8 @@
 	        this.mirandoDerecha = true;
 	        this.seEstaMoviendo = false;
 	        this.stateTime = 0f;
+	
+	       
 	
 	        // Carga y procesado de la textura del jugador
 	        sheetSoldado = new Texture(Gdx.files.internal("donpollo_derecha.png"));
@@ -66,8 +69,8 @@
 	            this.arsenal[0] = new Fusil(texturaBala);
 	        }
 	    }
-	
-	    public void actualizar(float deltaTime, Array<enemigos> listaEnemigos, Array<Proyectil> listaProyectiles) {
+	    
+	    public void actualizar(float deltaTime, Array<Enemigos> listaEnemigos, Array<Proyectil> listaProyectiles,Array<Jefe> listaJefes) {
 	        // 1. Procesar movimiento por teclado
 	        procesarEntrada(deltaTime);
 	
@@ -95,18 +98,31 @@
 	     // 4. Actualizar armas del arsenal
 	        float centroX = getCentroX();
 	        float centroY = getCentroY();
+	        float ancho = frameActual.getRegionWidth();
+	        float alto = frameActual.getRegionHeight();
 	        for (Arma arma : arsenal) {
 	            if (arma != null) {
-	                // Si el arma es un Fusil, le actualizamos su dirección antes de que actualice su reloj
+	                // Si el arma es un Fusil o Lanzallamas, actualizamos su dirección
 	                if (arma instanceof Fusil) {
 	                    ((Fusil) arma).setDireccion(direccionMirada);
-	                }else if (arma instanceof ArmaLanzallamas) {
+	                } else if (arma instanceof ArmaLanzallamas) {
 	                    ((ArmaLanzallamas) arma).setDireccion(direccionMirada);
 	                }
-	                // Todas las armas (incluido el fusil y el cuchillo) usan el actualizar normal con cadencia
-	                arma.actualizar(deltaTime, centroX, centroY, listaEnemigos, listaProyectiles);
+	                
+	                // NUEVO: Verificamos si es un arma que busca objetivos (Cuchillo, Molotov, etc.)
+	                // y le pasamos también la lista de jefes si tu arma lo soporta:
+	                if (arma instanceof ArmaCuchillo) {
+	                    // Si tienes un método específico para el cuchillo con jefes:
+	                    ((ArmaCuchillo) arma).actualizarConJefes(deltaTime,posicion.x, posicion.y, ancho, alto, listaEnemigos, listaJefes, listaProyectiles);
+	                } else if (arma instanceof Molotov) {
+	                    // Si tienes un método similar para el molotov:
+	                    ((Molotov) arma).actualizarConJefes(deltaTime, posicion.x, posicion.y, ancho, alto, listaEnemigos, listaJefes, listaProyectiles);
+	                } else {
+	                    // Demás armas estándar
+	                    arma.actualizar(deltaTime, centroX, centroY, listaEnemigos, listaProyectiles);
+	                }
 	            }
-	        }
+	    }
 	    }
 	    public void curarAlMaximo() {
 	        if (salud != null) {

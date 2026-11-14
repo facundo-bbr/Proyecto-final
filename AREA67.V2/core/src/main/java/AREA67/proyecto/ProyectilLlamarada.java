@@ -30,7 +30,7 @@ public class ProyectilLlamarada extends Proyectil {
     }
 
     @Override
-    public void actualizar(float deltaTime, Array<enemigos> listaEnemigos) {
+    public void actualizar(float deltaTime, Array<Enemigos> listaEnemigos) {
         if (!activo) return;
 
         // Movimiento idéntico al de la clase bala
