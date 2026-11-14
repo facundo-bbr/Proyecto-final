@@ -72,7 +72,7 @@ public class Recolector {
                 break;
             case "COFRE_TESORO":
             	Arma[] arsenal = jugador.getArsenal();
-            	int tipoArmaRandom = (int) (Math.random() * 4); // 0, 1, 2 o 3 (4 armas en total)
+            	int tipoArmaRandom = (int) (Math.random() * 5); // 0, 1, 2 o 3 (4 armas en total)
 
             	// 1. Verificamos si el jugador ya posee esa arma específica para mejorarla
             	boolean armaEncontrada = false;
@@ -104,11 +104,29 @@ public class Recolector {
             	            break;
             	        }
             	    }
-            	} else { // Caso 3: Molotov
+            	} else if (tipoArmaRandom == 2) {
+            	    for (Arma arma : arsenal) {
+            	        if (arma instanceof ArmaLanzallamas) {
+            	            ((ArmaLanzallamas) arma).aplicarMejoraProgresiva();
+            	            System.out.println("¡Lanzallamas mejorado desde el cofre!");
+            	            armaEncontrada = true;
+            	            break;
+            	        }
+            	    }
+            	} else if (tipoArmaRandom == 3) {
             	    for (Arma arma : arsenal) {
             	        if (arma instanceof Molotov) {
             	            ((Molotov) arma).aplicarMejoraProgresiva();
             	            System.out.println("¡Molotov mejorado desde el cofre!");
+            	            armaEncontrada = true;
+            	            break;
+            	        }
+            	    }
+            	} else { // Caso 4: Rifle
+            	    for (Arma arma : arsenal) {
+            	        if (arma instanceof Fusil) {
+            	            ((Fusil) arma).aplicarMejoraProgresiva();
+            	            System.out.println("¡Rifle mejorado desde el cofre!");
             	            armaEncontrada = true;
             	            break;
             	        }
