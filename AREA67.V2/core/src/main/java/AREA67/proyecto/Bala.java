@@ -6,13 +6,13 @@
 	import com.badlogic.gdx.math.Vector2;
 	import com.badlogic.gdx.utils.Array;
 	
-	public class bala extends Proyectil {
+	public class Bala extends Proyectil {
 	    private Vector2 velocidad; 
 	    private Texture texturaBala;
 	    private float tiempoDeVida; 
 	    private float anguloRotacion;
 	    
-	    public bala(Texture textura, float origenX, float origenY, Vector2 posicionObjetivo, int danoArma, float velocidadBala) {
+	    public Bala(Texture textura, float origenX, float origenY, Vector2 posicionObjetivo, int danoArma, float velocidadBala) {
 	        super(origenX, origenY, danoArma);
 	        this.texturaBala = textura;
 	        this.tiempoDeVida = 3.0f; 

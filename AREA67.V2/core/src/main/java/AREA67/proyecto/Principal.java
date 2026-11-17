@@ -276,7 +276,7 @@ public class Principal extends ApplicationAdapter {
         	if (!juegoPausado){
             tiempoJuego += deltaTime;
             
-            if (tiempoJuego >= 600f) {
+            if (tiempoJuego >= 180f) {
                 // Limpiamos opcionalmente el spawn normal si deseas que dejen de aparecer los demás
                 // (opcional: listaEnemigos.clear(); si quieres que la pantalla se limpie al llegar a los 10 min)
 
@@ -313,7 +313,7 @@ public class Principal extends ApplicationAdapter {
 
                 // 2. Spawneo de Zombies y Esqueletos
                 temporizadorSpawneo += deltaTime;
-                if (temporizadorSpawneo > 1.5f) {
+                if (temporizadorSpawneo > 3.0f) {
                     int tipoEnemigo = com.badlogic.gdx.math.MathUtils.random(0, 2);
                     
                     float anguloRandom = com.badlogic.gdx.math.MathUtils.random(0f, 360f * MathUtils.degreesToRadians);

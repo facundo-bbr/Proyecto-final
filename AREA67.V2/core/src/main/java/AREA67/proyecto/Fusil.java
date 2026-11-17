@@ -28,6 +28,6 @@ public class Fusil extends Arma {
         Vector2 posicionObjetivo = new Vector2(jugadorX, jugadorY).add(new Vector2(direccionActual).scl(1000f));
 
         // Dispara respetando la cadencia del temporizador de la clase Arma
-        listaProyectiles.add(new bala(texturaBala, jugadorX, jugadorY, posicionObjetivo, dano, velocidadBala));
+        listaProyectiles.add(new Bala(texturaBala, jugadorX, jugadorY, posicionObjetivo, dano, velocidadBala));
     }
 }
